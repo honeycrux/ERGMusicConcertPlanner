@@ -1,7 +1,10 @@
-export default function Home() {
+import { PerformanceGrid } from "@/components/performance/PerformanceGrid";
+import { data } from "./data";
+
+export default function EditPerformancePage() {
   return (
-    <div>
-      <h1>Edit Performance</h1>
+    <div className="">
+      <PerformanceGrid data={data} />
     </div>
   );
 }

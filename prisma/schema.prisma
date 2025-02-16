@@ -12,3 +12,59 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model Performance {
+  id                   String @id @default(auto()) @map("_id") @db.ObjectId
+  genre                String @default("")
+  piece                String @default("")
+  description          String @default("")
+  performerList        String @default("")
+  performerDescription String @default("")
+  remarks              String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applicant        Applicant?        @relation(name: "PerformanceApplicant")
+  preference       Preference?       @relation(name: "PerformancePreference")
+  stageRequirement StageRequirement? @relation(name: "PerformanceStageRequirement")
+}
+
+model Applicant {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  name    String @default("")
+  email   String @default("")
+  phone   String @default("")
+  remarks String @default("")
+
+  updatedAt DateTime @updatedAt
+
+  performanceId String       @unique @db.ObjectId
+  performance   Performance? @relation(name: "PerformanceApplicant", fields: [performanceId], references: [id])
+}
+
+model Preference {
+  id                    String @id @default(auto()) @map("_id") @db.ObjectId
+  concertAvailability   String @default("")
+  rehearsalAvailability String @default("")
+  remarks               String @default("")
+
+  updatedAt DateTime @updatedAt
+
+  performanceId String       @unique @db.ObjectId
+  performance   Performance? @relation(name: "PerformancePreference", fields: [performanceId], references: [id])
+}
+
+model StageRequirement {
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  chairCount      Int?
+  musicStandCount Int?
+  microphoneCount Int?
+  otherEquipment  String @default("")
+  remarks         String @default("")
+
+  updatedAt DateTime @updatedAt
+
+  performanceId String       @unique @db.ObjectId
+  performance   Performance? @relation(name: "PerformanceStageRequirement", fields: [performanceId], references: [id])
+}
