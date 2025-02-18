@@ -8,29 +8,35 @@ export const PerformanceDataSchema = z.object({
   performerList: z.string(),
   performerDescription: z.string(),
   remarks: z.string(),
+
+  updatedAt: z.date(),
+
   applicant: z.object({
     name: z.string(),
     email: z.string(),
     phone: z.string(),
     applicantRemarks: z.string(),
+
     updatedAt: z.date(),
   }),
+
   preference: z.object({
     concertAvailability: z.string(),
     rehearsalAvailability: z.string(),
     preferenceRemarks: z.string(),
+
     updatedAt: z.date(),
   }),
+
   stageRequirement: z.object({
-    chairCount: z.number().nullable(),
-    musicStandCount: z.number().nullable(),
-    microphoneCount: z.number().nullable(),
+    chairCount: z.number().int().nonnegative().nullable(),
+    musicStandCount: z.number().int().nonnegative().nullable(),
+    microphoneCount: z.number().int().nonnegative().nullable(),
     otherEquipment: z.string(),
     stageRemarks: z.string(),
+
     updatedAt: z.date(),
   }),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 
 export type PerformanceData = z.infer<typeof PerformanceDataSchema>;

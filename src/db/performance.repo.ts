@@ -128,8 +128,8 @@ export async function updatePerformances(data: EditPerformanceDataWithId[]): Pro
   };
 }
 
-export async function deletePerformances(id: string[]): Promise<DatabaseResponse<undefined>> {
-  if (id.length === 0) {
+export async function deletePerformances(ids: string[]): Promise<DatabaseResponse<undefined>> {
+  if (ids.length === 0) {
     return {
       success: true,
       data: undefined,
@@ -139,7 +139,7 @@ export async function deletePerformances(id: string[]): Promise<DatabaseResponse
   const result = await prismaClient.performance.deleteMany({
     where: {
       id: {
-        in: id,
+        in: ids,
       },
     },
   });
