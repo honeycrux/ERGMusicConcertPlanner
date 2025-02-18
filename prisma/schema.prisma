@@ -31,28 +31,28 @@ model Performance {
 }
 
 model Applicant {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  name    String @default("")
-  email   String @default("")
-  phone   String @default("")
-  remarks String @default("")
+  id               String @id @default(auto()) @map("_id") @db.ObjectId
+  name             String @default("")
+  email            String @default("")
+  phone            String @default("")
+  applicantRemarks String @default("")
 
   updatedAt DateTime @updatedAt
 
   performanceId String       @unique @db.ObjectId
-  performance   Performance? @relation(name: "PerformanceApplicant", fields: [performanceId], references: [id])
+  performance   Performance? @relation(name: "PerformanceApplicant", fields: [performanceId], references: [id], onDelete: Cascade)
 }
 
 model Preference {
   id                    String @id @default(auto()) @map("_id") @db.ObjectId
   concertAvailability   String @default("")
   rehearsalAvailability String @default("")
-  remarks               String @default("")
+  preferenceRemarks     String @default("")
 
   updatedAt DateTime @updatedAt
 
   performanceId String       @unique @db.ObjectId
-  performance   Performance? @relation(name: "PerformancePreference", fields: [performanceId], references: [id])
+  performance   Performance? @relation(name: "PerformancePreference", fields: [performanceId], references: [id], onDelete: Cascade)
 }
 
 model StageRequirement {
@@ -61,10 +61,10 @@ model StageRequirement {
   musicStandCount Int?
   microphoneCount Int?
   otherEquipment  String @default("")
-  remarks         String @default("")
+  stageRemarks    String @default("")
 
   updatedAt DateTime @updatedAt
 
   performanceId String       @unique @db.ObjectId
-  performance   Performance? @relation(name: "PerformanceStageRequirement", fields: [performanceId], references: [id])
+  performance   Performance? @relation(name: "PerformanceStageRequirement", fields: [performanceId], references: [id], onDelete: Cascade)
 }

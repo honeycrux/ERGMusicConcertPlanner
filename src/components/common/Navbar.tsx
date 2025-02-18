@@ -11,7 +11,6 @@ const routeTitles: Record<string, string> = {
   "/": "Home",
   "/performance": "Edit Performance",
   "/rundown": "Edit Rundown",
-  "/views": "View Data",
 };
 
 export const Navbar = () => {
@@ -61,11 +60,6 @@ export const Navbar = () => {
             <Link href="/rundown">
               <div className="lg:inline-flex lg:w-auto w-full px-3 py-2 rounded text-black font-bold items-center justify-center hover:bg-stone-300 hover:text-black">
                 Edit Rundown
-              </div>
-            </Link>
-            <Link href="/views">
-              <div className="lg:inline-flex lg:w-auto w-full px-3 py-2 rounded text-black font-bold items-center justify-center hover:bg-stone-300 hover:text-black">
-                View Data
               </div>
             </Link>
           </div>

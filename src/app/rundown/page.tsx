@@ -1,7 +1,3 @@
 export default function Home() {
-  return (
-    <div>
-      <h1>Edit Rundown</h1>
-    </div>
-  );
+  return <div className="flex justify-center text-xl font-bold p-4">Edit Rundown</div>;
 }

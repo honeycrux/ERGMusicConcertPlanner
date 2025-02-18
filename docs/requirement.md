@@ -12,17 +12,18 @@ Requirements:
 
 Features:
 
-1. "Edit Performance" Page
+1. Home Page
+    - Show overall view
+    - Show stage view, rundown view, and MC view, which are data summaries for each kind of activity
+    - Download the views either in picture format or in a format readable by Excel/Google Sheets
+2. "Edit Performance" Page
     - Add performance item
     - Edit performance item
     - Delete performance item
-2. "Edit Rundown" Page
+3. "Edit Rundown" Page
     - Add performance items and breaks to the rundown
     - Edit rundown order
     - Show summary of rundown, including expected starting and ending time of each item
-3. "Helper Views" Page(s)
-    - Show stage view, rundown view, and MC view, which are summaries of performance or rundown for each kind of activity
-    - Download the views either in picture format or in a format readable by Excel/Google Sheets
 
 ## Overview
 
