@@ -145,9 +145,7 @@ export async function savePerformanceDataController(data: unknown[][]) {
 
   const result = await savePerformanceDataUsecase(newData);
 
-  const totalChanged = (result.totalCreated ?? 0) + (result.totalUpdated ?? 0) + (result.totalDeleted ?? 0);
-
-  if (totalChanged > 0) {
+  if (result.needToRefresh) {
     revalidatePath("/performance");
   }
 

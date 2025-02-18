@@ -43,6 +43,8 @@ export const EditPerformanceDataSchema = PerformanceDataSchema.extend({
 
 export type EditPerformanceData = z.infer<typeof EditPerformanceDataSchema>;
 
+export type EditPerformanceDataWithId = EditPerformanceData & { id: string };
+
 export type PerformanceLabelKey =
   | "id"
   | "genre"
@@ -110,26 +112,3 @@ export const performanceColumns: PerformanceLabelDefinition[] = [
     ],
   },
 ];
-
-export function performanceEquals(a: EditPerformanceData, b: EditPerformanceData) {
-  return (
-    a.genre === b.genre &&
-    a.piece === b.piece &&
-    a.description === b.description &&
-    a.performerList === b.performerList &&
-    a.performerDescription === b.performerDescription &&
-    a.remarks === b.remarks &&
-    a.applicant?.name === b.applicant?.name &&
-    a.applicant?.email === b.applicant?.email &&
-    a.applicant?.phone === b.applicant?.phone &&
-    a.applicant?.applicantRemarks === b.applicant?.applicantRemarks &&
-    a.preference?.concertAvailability === b.preference?.concertAvailability &&
-    a.preference?.rehearsalAvailability === b.preference?.rehearsalAvailability &&
-    a.preference?.preferenceRemarks === b.preference?.preferenceRemarks &&
-    a.stageRequirement?.chairCount === b.stageRequirement?.chairCount &&
-    a.stageRequirement?.musicStandCount === b.stageRequirement?.musicStandCount &&
-    a.stageRequirement?.microphoneCount === b.stageRequirement?.microphoneCount &&
-    a.stageRequirement?.otherEquipment === b.stageRequirement?.otherEquipment &&
-    a.stageRequirement?.stageRemarks === b.stageRequirement?.stageRemarks
-  );
-}

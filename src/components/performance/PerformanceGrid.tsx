@@ -117,7 +117,8 @@ export function PerformanceGrid({ data }: { data: PerformanceDataEditView[] }) {
           rowHeaders={true}
           colHeaders={true}
           colWidths={150}
-          contextMenu={["remove_row"]}
+          contextMenu={["remove_row", "undo", "redo"]}
+          undo={true}
           height="auto"
           autoWrapRow={true}
           autoWrapCol={true}

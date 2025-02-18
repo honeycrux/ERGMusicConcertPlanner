@@ -1,4 +1,4 @@
-import { EditPerformanceData, PerformanceData, PerformanceDataSchema, performanceEquals } from "@/models/performance.model";
+import { EditPerformanceData, EditPerformanceDataWithId, PerformanceData, PerformanceDataSchema } from "@/models/performance.model";
 import { prismaClient } from "./db";
 import { DatabaseResponse } from "./db.interface";
 
@@ -69,42 +69,8 @@ export async function createPerformances(data: EditPerformanceData[]): Promise<D
   };
 }
 
-export async function updatePerformances(data: { id: string; data: EditPerformanceData }[]): Promise<DatabaseResponse<PerformanceData[]>> {
-  const unparsedOriginalData = await prismaClient.performance.findMany({
-    where: { id: { in: data.map((performance) => performance.id) } },
-    include: {
-      applicant: true,
-      preference: true,
-      stageRequirement: true,
-    },
-  });
-
-  const { success: originalDataIsValid, data: originalData } = PerformanceDataSchema.array().safeParse(unparsedOriginalData);
-
-  if (!originalDataIsValid) {
-    console.error("Failed to parse original data", unparsedOriginalData);
-    return {
-      success: false,
-      message: "Update failed because original data could not be parsed",
-    };
-  }
-
-  const updatedPerformances = data.filter((performance) => {
-    const originalPerformance = originalData.find((p) => p.id === performance.id);
-
-    if (!originalPerformance) {
-      console.error("Failed to find original performance", performance);
-      return {
-        success: false,
-        message: `Failed to find original performance with ID "${performance.id}"`,
-      };
-    }
-
-    const equals = performanceEquals(performance.data, originalPerformance);
-    return !equals;
-  });
-
-  if (updatedPerformances.length === 0) {
+export async function updatePerformances(data: EditPerformanceDataWithId[]): Promise<DatabaseResponse<PerformanceData[]>> {
+  if (data.length === 0) {
     return {
       success: true,
       data: [],
@@ -112,20 +78,20 @@ export async function updatePerformances(data: { id: string; data: EditPerforman
   }
 
   const operations = data.map((performance) => {
-    const performanceWithoutId = { ...performance.data, id: undefined };
+    const performanceWithoutId = { ...performance, id: undefined };
 
     return prismaClient.performance.update({
       where: { id: performance.id },
       data: {
         ...performanceWithoutId,
         applicant: {
-          update: performance.data.applicant,
+          update: performance.applicant,
         },
         preference: {
-          update: performance.data.preference,
+          update: performance.preference,
         },
         stageRequirement: {
-          update: performance.data.stageRequirement,
+          update: performance.stageRequirement,
         },
       },
       include: {
