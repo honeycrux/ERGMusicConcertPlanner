@@ -1,11 +1,6 @@
-import { DatabaseResponse } from "@/db/db.interface";
-import { createPerformances, deletePerformances, getAllPerformances } from "@/db/performance.repo";
-import { EditPerformanceData, PerformanceData } from "@/models/performance.model";
-
-export async function getPerformanceDataUsecase(): Promise<DatabaseResponse<PerformanceData[]>> {
-  const result = await getAllPerformances();
-  return result;
-}
+import { createPerformances, deletePerformances } from "@/db/performance.repo";
+import { EditPerformanceData } from "@/models/performance.model";
+import { getPerformanceDataUsecase } from "./get-performance-data.usecase";
 
 export async function savePerformanceDataUsecase(data: EditPerformanceData[]): Promise<{ success: boolean; message: string; needToRefresh?: boolean }> {
   const existingPerformances = await getPerformanceDataUsecase();

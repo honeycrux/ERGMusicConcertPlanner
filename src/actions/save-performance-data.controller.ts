@@ -1,38 +1,20 @@
 "use server";
 
-import { DatabaseResponse } from "@/db/db.interface";
 import {
   EditPerformanceData,
   EditPerformanceDataSchema,
-  performanceColumns,
-  PerformanceData,
-  PerformanceLabelDefinition,
-  PerformanceLabelKey,
+  performanceColumnGroups,
+  PerformanceColumnGroupDefinition,
+  PerformanceColumnKey,
 } from "@/models/performance.model";
-import { getPerformanceDataUsecase, savePerformanceDataUsecase } from "@/usecases/performance.usecase";
+import { savePerformanceDataUsecase } from "@/usecases/save-performance-data.usecase";
 import { revalidatePath } from "next/cache";
-
-export async function getPerformanceDataController(): Promise<DatabaseResponse<PerformanceData[]>> {
-  const result = await getPerformanceDataUsecase();
-
-  if (!result.success) {
-    return {
-      success: false,
-      message: "Failed to get performance data",
-    };
-  }
-
-  return {
-    success: true,
-    data: result.data,
-  };
-}
 
 function isEmptyCell(cell: unknown): boolean {
   return cell === undefined || cell === null || cell === "";
 }
 
-function extractValueFromRow(row: unknown[], allColumns: PerformanceLabelDefinition["columns"], key: PerformanceLabelKey): unknown {
+function extractValueFromRow(row: unknown[], allColumns: PerformanceColumnGroupDefinition["columns"], key: PerformanceColumnKey): unknown {
   const columnIndex = allColumns.findIndex((column) => column.key === key);
 
   if (columnIndex === -1) {
@@ -53,7 +35,7 @@ function extractValueFromRow(row: unknown[], allColumns: PerformanceLabelDefinit
 
 export async function savePerformanceDataController(data: unknown[][]) {
   console.log(data);
-  const allColumns = performanceColumns.flatMap((column) => column.columns);
+  const allColumns = performanceColumnGroups.flatMap((column) => column.columns);
 
   const newData: EditPerformanceData[] = [];
 

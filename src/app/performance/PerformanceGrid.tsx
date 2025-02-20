@@ -7,9 +7,9 @@ import { registerAllModules } from "handsontable/registry";
 registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
-import { performanceColumns, PerformanceData } from "@/models/performance.model";
+import { performanceColumnGroups, PerformanceData } from "@/models/performance.model";
 import { ReactElement, useRef, useState } from "react";
-import { savePerformanceDataController } from "@/actions/performance.action";
+import { savePerformanceDataController } from "@/actions/save-performance-data.controller";
 
 export function PerformanceGrid({ data }: { data: PerformanceData[] }) {
   const hotRef = useRef<HotTableRef>(null);
@@ -89,11 +89,11 @@ export function PerformanceGrid({ data }: { data: PerformanceData[] }) {
   };
 
   const nestedHeaders = [
-    performanceColumns.map((column) => ({
+    performanceColumnGroups.map((column) => ({
       label: column.groupLabel,
       colspan: column.columns.length,
     })),
-    performanceColumns.flatMap((column) => column.columns.map((column) => column.label)),
+    performanceColumnGroups.flatMap((column) => column.columns.map((column) => column.label)),
   ];
 
   console.log(data);
@@ -105,7 +105,7 @@ export function PerformanceGrid({ data }: { data: PerformanceData[] }) {
           ref={hotRef}
           data={data}
           nestedHeaders={nestedHeaders}
-          columns={performanceColumns.flatMap((column) => {
+          columns={performanceColumnGroups.flatMap((column) => {
             return column.columns.map((column) => {
               const baseConfig = {
                 data: column.key,

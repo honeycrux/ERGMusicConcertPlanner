@@ -1,4 +1,4 @@
-import { getPerformanceDataController } from "@/actions/performance.action";
+import { getPerformanceDataController } from "@/actions/get-performance-data.controller";
 import { LoadingText } from "@/components/common/LoadingText";
 import { PerformanceGrid } from "@/app/performance/PerformanceGrid";
 import { Suspense } from "react";

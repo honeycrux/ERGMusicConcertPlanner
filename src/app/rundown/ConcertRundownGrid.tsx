@@ -8,10 +8,11 @@ registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { ReactElement, useRef, useState } from "react";
-import { PerformanceRundownView, rundownSlotColumns, RundownSlotData } from "@/models/rundown.model";
-import { saveConcertSlotDataController } from "@/actions/concertslot.action";
+import { rundownSlotColumnGroups, RundownSlotData } from "@/models/rundown.model";
+import { saveConcertSlotDataController } from "@/actions/save-rundown-data.controller";
+import { PreferenceView } from "@/models/views.model";
 
-export function ConcertRundownGrid({ rundownSlots, performances }: { rundownSlots: RundownSlotData[]; performances: PerformanceRundownView[] }) {
+export function ConcertRundownGrid({ rundownSlots, performances }: { rundownSlots: RundownSlotData[]; performances: PreferenceView[] }) {
   const hotRef = useRef<HotTableRef>(null);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
 
@@ -89,11 +90,11 @@ export function ConcertRundownGrid({ rundownSlots, performances }: { rundownSlot
   };
 
   const nestedHeaders = [
-    rundownSlotColumns.map((column) => ({
+    rundownSlotColumnGroups.map((column) => ({
       label: column.groupLabel,
       colspan: column.columns.length,
     })),
-    rundownSlotColumns.flatMap((column) => column.columns.map((column) => column.label)),
+    rundownSlotColumnGroups.flatMap((column) => column.columns.map((column) => column.label)),
   ];
 
   console.log(rundownSlots);
@@ -105,7 +106,7 @@ export function ConcertRundownGrid({ rundownSlots, performances }: { rundownSlot
           ref={hotRef}
           data={rundownSlots}
           nestedHeaders={nestedHeaders}
-          columns={rundownSlotColumns.flatMap((column) => {
+          columns={rundownSlotColumnGroups.flatMap((column) => {
             return column.columns.map((column) => {
               const baseConfig = {
                 data: column.key,

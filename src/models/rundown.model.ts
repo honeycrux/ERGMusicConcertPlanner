@@ -1,15 +1,5 @@
 import { z } from "zod";
-
-export const PerformanceRundownViewSchema = z.object({
-  id: z.string(),
-  genre: z.string(),
-  piece: z.string(),
-  applicant: z.object({
-    name: z.string(),
-  }),
-});
-
-export type PerformanceRundownView = z.infer<typeof PerformanceRundownViewSchema>;
+import { PreferenceViewSchema } from "./views.model";
 
 export const RundownSlotDataSchema = z.object({
   id: z.string(),
@@ -22,7 +12,7 @@ export const RundownSlotDataSchema = z.object({
 
   updatedAt: z.date(),
 
-  performance: PerformanceRundownViewSchema.nullable(),
+  performance: PreferenceViewSchema.nullable(),
 });
 
 export type RundownSlotData = z.infer<typeof RundownSlotDataSchema>;
@@ -40,7 +30,7 @@ export type EditRundownSlotData = z.infer<typeof EditRundownSlotDataSchema>;
 
 export type EditRundownSlotDataWithId = EditRundownSlotData & { id: string };
 
-export type RundownSlotLabelKey =
+export type RundownSlotColumnKey =
   | "id"
   | "order"
   | "name"
@@ -50,15 +40,17 @@ export type RundownSlotLabelKey =
   | "remarks"
   | "performance.id"
   | "performance.genre"
-  | "performance.piece"
-  | "performance.applicant.name";
+  | "performance.applicant.name"
+  | "preference.concertAvailability"
+  | "preference.rehearsalAvailability"
+  | "preference.preferenceRemarks";
 
-export type RundownSlotLabelDefinition = {
+export type RundownSlotColumnGroupDefinition = {
   groupLabel: string;
-  columns: { label: string; key: RundownSlotLabelKey; type: "text" | "numeric" | "time" | "dropdown"; readOnly?: boolean; default: unknown; width?: number }[];
+  columns: { label: string; key: RundownSlotColumnKey; type: "text" | "numeric" | "time" | "dropdown"; readOnly?: boolean; default: unknown; width?: number }[];
 };
 
-export const rundownSlotColumns: RundownSlotLabelDefinition[] = [
+export const rundownSlotColumnGroups: RundownSlotColumnGroupDefinition[] = [
   {
     groupLabel: "Time Slot",
     columns: [
@@ -74,10 +66,12 @@ export const rundownSlotColumns: RundownSlotLabelDefinition[] = [
   {
     groupLabel: "Performance",
     columns: [
-      { label: "ID", key: "performance.id", type: "dropdown", default: undefined, width: 220 },
+      { label: "ID", key: "performance.id", type: "dropdown", readOnly: true, default: undefined, width: 220 },
       { label: "Genre", key: "performance.genre", type: "text", readOnly: true, default: "" },
-      { label: "Piece", key: "performance.piece", type: "text", readOnly: true, default: "" },
       { label: "Applicant Name", key: "performance.applicant.name", type: "text", readOnly: true, default: "" },
+      { label: "Concert Availability", key: "preference.concertAvailability", type: "text", readOnly: true, default: "" },
+      { label: "Rehearsal Availability", key: "preference.rehearsalAvailability", type: "text", readOnly: true, default: "" },
+      { label: "Preference Remarks", key: "preference.preferenceRemarks", type: "text", readOnly: true, default: "" },
     ],
   },
 ];

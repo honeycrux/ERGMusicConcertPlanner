@@ -11,10 +11,16 @@ export async function getAllConcertSlots(): Promise<DatabaseResponse<RundownSlot
           select: {
             id: true,
             genre: true,
-            piece: true,
             applicant: {
               select: {
                 name: true,
+              },
+            },
+            preference: {
+              select: {
+                concertAvailability: true,
+                rehearsalAvailability: true,
+                preferenceRemarks: true,
               },
             },
           },
@@ -46,19 +52,6 @@ export async function getAllConcertSlots(): Promise<DatabaseResponse<RundownSlot
       success: false,
       message: "Failed to parse data",
     };
-  }
-
-  for (const slot of data) {
-    if (slot.performance === null) {
-      slot.performance = {
-        id: "",
-        genre: "",
-        piece: "",
-        applicant: {
-          name: "",
-        },
-      };
-    }
   }
 
   return {

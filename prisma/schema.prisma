@@ -22,6 +22,7 @@ model Performance {
   performerDescription String @default("")
   remarks              String @default("")
 
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   applicant        Applicant?        @relation(name: "PerformanceApplicant")
@@ -38,6 +39,7 @@ model Applicant {
   phone            String @default("")
   applicantRemarks String @default("")
 
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   performanceId String       @unique @db.ObjectId
@@ -50,6 +52,7 @@ model Preference {
   rehearsalAvailability String @default("")
   preferenceRemarks     String @default("")
 
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   performanceId String       @unique @db.ObjectId
@@ -64,6 +67,7 @@ model StageRequirement {
   otherEquipment  String @default("")
   stageRemarks    String @default("")
 
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   performanceId String       @unique @db.ObjectId
@@ -79,6 +83,7 @@ model ConcertSlot {
   bufferDuration Float     @default(0)
   remarks        String    @default("")
 
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   performanceId String?      @db.ObjectId
@@ -94,6 +99,7 @@ model RehearsalSlot {
   bufferDuration Int       @default(0)
   remarks        String    @default("")
 
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   performanceId String?      @db.ObjectId

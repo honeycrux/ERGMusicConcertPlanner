@@ -1,51 +1,20 @@
 "use server";
 
-import { DatabaseResponse } from "@/db/db.interface";
 import {
   EditRundownSlotData,
   EditRundownSlotDataSchema,
-  PerformanceRundownView,
-  rundownSlotColumns,
-  RundownSlotData,
-  RundownSlotLabelDefinition,
-  RundownSlotLabelKey,
+  rundownSlotColumnGroups,
+  RundownSlotColumnGroupDefinition,
+  RundownSlotColumnKey,
 } from "@/models/rundown.model";
-import { getAvailablePerformancesUsecase, getConcertSlotDataUsecase, saveConcertSlotDataUsecase } from "@/usecases/concertslot.usecase";
+import { saveConcertSlotDataUsecase } from "@/usecases/save-rundown-data.usecase";
 import { revalidatePath } from "next/cache";
-
-export async function getConcertSlotDataController(): Promise<DatabaseResponse<{ rundownSlots: RundownSlotData[]; performances: PerformanceRundownView[] }>> {
-  const consertSlotResult = await getConcertSlotDataUsecase();
-
-  if (!consertSlotResult.success) {
-    return {
-      success: false,
-      message: "Failed to get concert slot data",
-    };
-  }
-
-  const performanceResult = await getAvailablePerformancesUsecase();
-
-  if (!performanceResult.success) {
-    return {
-      success: false,
-      message: "Failed to get performance data",
-    };
-  }
-
-  return {
-    success: true,
-    data: {
-      rundownSlots: consertSlotResult.data,
-      performances: performanceResult.data,
-    },
-  };
-}
 
 function isEmptyCell(cell: unknown): boolean {
   return cell === undefined || cell === null || cell === "";
 }
 
-function extractValueFromRow(row: unknown[], allColumns: RundownSlotLabelDefinition["columns"], key: RundownSlotLabelKey): unknown {
+function extractValueFromRow(row: unknown[], allColumns: RundownSlotColumnGroupDefinition["columns"], key: RundownSlotColumnKey): unknown {
   const columnIndex = allColumns.findIndex((column) => column.key === key);
 
   if (columnIndex === -1) {
@@ -66,7 +35,7 @@ function extractValueFromRow(row: unknown[], allColumns: RundownSlotLabelDefinit
 
 export async function saveConcertSlotDataController(data: unknown[][]) {
   console.log(data);
-  const allColumns = rundownSlotColumns.flatMap((column) => column.columns);
+  const allColumns = rundownSlotColumnGroups.flatMap((column) => column.columns);
 
   const newData: EditRundownSlotData[] = [];
 

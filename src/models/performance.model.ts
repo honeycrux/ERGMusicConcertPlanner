@@ -51,7 +51,7 @@ export type EditPerformanceData = z.infer<typeof EditPerformanceDataSchema>;
 
 export type EditPerformanceDataWithId = EditPerformanceData & { id: string };
 
-export type PerformanceLabelKey =
+export type PerformanceColumnKey =
   | "id"
   | "genre"
   | "piece"
@@ -72,12 +72,12 @@ export type PerformanceLabelKey =
   | "stageRequirement.otherEquipment"
   | "stageRequirement.stageRemarks";
 
-export type PerformanceLabelDefinition = {
+export type PerformanceColumnGroupDefinition = {
   groupLabel: string;
-  columns: { label: string; key: PerformanceLabelKey; type: "text" | "numeric"; readOnly?: boolean; default: unknown; width?: number }[];
+  columns: { label: string; key: PerformanceColumnKey; type: "text" | "numeric"; readOnly?: boolean; default: unknown; width?: number }[];
 };
 
-export const performanceColumns: PerformanceLabelDefinition[] = [
+export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
   {
     groupLabel: "Performance",
     columns: [

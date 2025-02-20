@@ -217,3 +217,43 @@ export async function deletePerformances(ids: string[]): Promise<DatabaseRespons
     data: undefined,
   };
 }
+
+export async function getAllPerformancesWithRundownDetail() {
+  let unparsedData;
+  try {
+    unparsedData = await prismaClient.performance.findMany({
+      include: {
+        applicant: true,
+        preference: true,
+        stageRequirement: true,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to fetch performances", error.stack);
+      return {
+        success: false,
+        message: "Failed to fetch performances " + error.stack,
+      };
+    }
+    return {
+      success: false,
+      message: "Failed to fetch performances " + error,
+    };
+  }
+
+  const { success, data } = PerformanceDataSchema.array().safeParse(unparsedData);
+
+  if (!success) {
+    console.error("Failed to parse data", data);
+    return {
+      success: false,
+      message: "Failed to parse data",
+    };
+  }
+
+  return {
+    success: true,
+    data: data,
+  };
+}
