@@ -7,11 +7,11 @@ import { registerAllModules } from "handsontable/registry";
 registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
-import { performanceColumns } from "@/models/performance.model";
+import { performanceColumns, PerformanceData } from "@/models/performance.model";
 import { ReactElement, useRef, useState } from "react";
-import { PerformanceDataEditView, savePerformanceDataController } from "@/actions/performance.action";
+import { savePerformanceDataController } from "@/actions/performance.action";
 
-export function PerformanceGrid({ data }: { data: PerformanceDataEditView[] }) {
+export function PerformanceGrid({ data }: { data: PerformanceData[] }) {
   const hotRef = useRef<HotTableRef>(null);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
 
@@ -96,6 +96,8 @@ export function PerformanceGrid({ data }: { data: PerformanceDataEditView[] }) {
     performanceColumns.flatMap((column) => column.columns.map((column) => column.label)),
   ];
 
+  console.log(data);
+
   return (
     <>
       <div className="ht-theme-main pb-2">
@@ -105,23 +107,24 @@ export function PerformanceGrid({ data }: { data: PerformanceDataEditView[] }) {
           nestedHeaders={nestedHeaders}
           columns={performanceColumns.flatMap((column) => {
             return column.columns.map((column) => {
-              return {
+              const baseConfig = {
                 data: column.key,
                 type: column.type,
                 readOnly: column.readOnly,
-                allowInvalid: false,
-                allowEmpty: true,
+                width: column.width,
               };
+              return baseConfig;
             });
           })}
+          allowInvalid={false}
+          allowEmpty={true}
+          undo={true}
+          wordWrap={true}
           rowHeaders={true}
           colHeaders={true}
           colWidths={150}
           contextMenu={["remove_row", "undo", "redo"]}
-          undo={true}
           height="auto"
-          autoWrapRow={true}
-          autoWrapCol={true}
           licenseKey="non-commercial-and-evaluation"
         />
       </div>

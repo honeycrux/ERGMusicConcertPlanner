@@ -12,45 +12,7 @@ import {
 import { getPerformanceDataUsecase, savePerformanceDataUsecase } from "@/usecases/performance.usecase";
 import { revalidatePath } from "next/cache";
 
-export type PerformanceDataEditView = Pick<PerformanceData, "id" | "genre" | "piece" | "description" | "performerList" | "performerDescription" | "remarks"> & {
-  applicant: Pick<PerformanceData["applicant"], "name" | "email" | "phone" | "applicantRemarks">;
-  preference: Pick<PerformanceData["preference"], "concertAvailability" | "rehearsalAvailability" | "preferenceRemarks">;
-  stageRequirement: Pick<PerformanceData["stageRequirement"], "chairCount" | "musicStandCount" | "microphoneCount" | "otherEquipment" | "stageRemarks">;
-};
-
-function performanceDataPresenter(data: PerformanceData[]): PerformanceDataEditView[] {
-  return data.map((performance) => {
-    return {
-      id: performance.id,
-      genre: performance.genre,
-      piece: performance.piece,
-      description: performance.description,
-      performerList: performance.performerList,
-      performerDescription: performance.performerDescription,
-      remarks: performance.remarks,
-      applicant: {
-        name: performance.applicant.name,
-        email: performance.applicant.email,
-        phone: performance.applicant.phone,
-        applicantRemarks: performance.applicant.applicantRemarks,
-      },
-      preference: {
-        concertAvailability: performance.preference.concertAvailability,
-        rehearsalAvailability: performance.preference.rehearsalAvailability,
-        preferenceRemarks: performance.preference.preferenceRemarks,
-      },
-      stageRequirement: {
-        chairCount: performance.stageRequirement.chairCount,
-        musicStandCount: performance.stageRequirement.musicStandCount,
-        microphoneCount: performance.stageRequirement.microphoneCount,
-        otherEquipment: performance.stageRequirement.otherEquipment,
-        stageRemarks: performance.stageRequirement.stageRemarks,
-      },
-    };
-  });
-}
-
-export async function getPerformanceDataController(): Promise<DatabaseResponse<ReturnType<typeof performanceDataPresenter>>> {
+export async function getPerformanceDataController(): Promise<DatabaseResponse<PerformanceData[]>> {
   const result = await getPerformanceDataUsecase();
 
   if (!result.success) {
@@ -62,7 +24,7 @@ export async function getPerformanceDataController(): Promise<DatabaseResponse<R
 
   return {
     success: true,
-    data: performanceDataPresenter(result.data),
+    data: result.data,
   };
 }
 

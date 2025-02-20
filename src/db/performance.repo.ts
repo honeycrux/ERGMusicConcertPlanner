@@ -3,13 +3,28 @@ import { prismaClient } from "./db";
 import { DatabaseResponse } from "./db.interface";
 
 export async function getAllPerformances(): Promise<DatabaseResponse<PerformanceData[]>> {
-  const unparsedData = await prismaClient.performance.findMany({
-    include: {
-      applicant: true,
-      preference: true,
-      stageRequirement: true,
-    },
-  });
+  let unparsedData;
+  try {
+    unparsedData = await prismaClient.performance.findMany({
+      include: {
+        applicant: true,
+        preference: true,
+        stageRequirement: true,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to fetch performances", error.stack);
+      return {
+        success: false,
+        message: "Failed to fetch performances " + error.stack,
+      };
+    }
+    return {
+      success: false,
+      message: "Failed to fetch performances " + error,
+    };
+  }
 
   const { success, data } = PerformanceDataSchema.array().safeParse(unparsedData);
 
@@ -51,7 +66,22 @@ export async function createPerformances(data: EditPerformanceData[]): Promise<D
     });
   });
 
-  const unparsedData = await prismaClient.$transaction(operations);
+  let unparsedData;
+  try {
+    unparsedData = await prismaClient.$transaction(operations);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to create performances", error.stack);
+      return {
+        success: false,
+        message: "Failed to create performances " + error.stack,
+      };
+    }
+    return {
+      success: false,
+      message: "Failed to create performances " + error,
+    };
+  }
 
   const { success, data: parsedData } = PerformanceDataSchema.array().safeParse(unparsedData);
 
@@ -102,7 +132,22 @@ export async function updatePerformances(data: EditPerformanceDataWithId[]): Pro
     });
   });
 
-  const unparsedNewData = await prismaClient.$transaction(operations);
+  let unparsedNewData;
+  try {
+    unparsedNewData = await prismaClient.$transaction(operations);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to update performances", error.stack);
+      return {
+        success: false,
+        message: "Failed to update performances " + error.stack,
+      };
+    }
+    return {
+      success: false,
+      message: "Failed to update performances " + error,
+    };
+  }
 
   if (!unparsedNewData) {
     console.error("Failed to update data", unparsedNewData);
@@ -136,13 +181,28 @@ export async function deletePerformances(ids: string[]): Promise<DatabaseRespons
     };
   }
 
-  const result = await prismaClient.performance.deleteMany({
-    where: {
-      id: {
-        in: ids,
+  let result;
+  try {
+    result = await prismaClient.performance.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to delete performances", error.stack);
+      return {
+        success: false,
+        message: "Failed to delete performances " + error.stack,
+      };
+    }
+    return {
+      success: false,
+      message: "Failed to delete performances " + error,
+    };
+  }
 
   if (!result || result.count === 0) {
     console.error("Failed to delete data", result);

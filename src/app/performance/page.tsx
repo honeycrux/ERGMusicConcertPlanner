@@ -1,14 +1,10 @@
 import { getPerformanceDataController } from "@/actions/performance.action";
 import { LoadingText } from "@/components/common/LoadingText";
-import { PerformanceGrid } from "@/components/performance/PerformanceGrid";
+import { PerformanceGrid } from "@/app/performance/PerformanceGrid";
 import { Suspense } from "react";
 
-async function PerformanceGridWrapper({ delay }: { delay?: number }) {
+async function PerformanceGridWrapper() {
   "use server";
-
-  if (delay) {
-    await new Promise((resolve) => setTimeout(resolve, delay));
-  }
 
   const result = await getPerformanceDataController();
 

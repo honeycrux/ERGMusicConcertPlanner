@@ -22,12 +22,13 @@ model Performance {
   performerDescription String @default("")
   remarks              String @default("")
 
-  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   applicant        Applicant?        @relation(name: "PerformanceApplicant")
   preference       Preference?       @relation(name: "PerformancePreference")
   stageRequirement StageRequirement? @relation(name: "PerformanceStageRequirement")
+  rehearsalSlot    RehearsalSlot[]   @relation(name: "PerformanceRehearsalSlot")
+  concertSlot      ConcertSlot[]     @relation(name: "PerformanceConcertSlot")
 }
 
 model Applicant {
@@ -67,4 +68,34 @@ model StageRequirement {
 
   performanceId String       @unique @db.ObjectId
   performance   Performance? @relation(name: "PerformanceStageRequirement", fields: [performanceId], references: [id], onDelete: Cascade)
+}
+
+model ConcertSlot {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  order          Int
+  name           String    @default("")
+  startTime      DateTime?
+  eventDuration  Float     @default(0)
+  bufferDuration Float     @default(0)
+  remarks        String    @default("")
+
+  updatedAt DateTime @updatedAt
+
+  performanceId String?      @db.ObjectId
+  performance   Performance? @relation(name: "PerformanceConcertSlot", fields: [performanceId], references: [id], onDelete: Cascade)
+}
+
+model RehearsalSlot {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  order          Int
+  name           String    @default("")
+  startTime      DateTime?
+  eventDuration  Int       @default(0)
+  bufferDuration Int       @default(0)
+  remarks        String    @default("")
+
+  updatedAt DateTime @updatedAt
+
+  performanceId String?      @db.ObjectId
+  performance   Performance? @relation(name: "PerformanceRehearsalSlot", fields: [performanceId], references: [id], onDelete: Cascade)
 }

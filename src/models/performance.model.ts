@@ -74,14 +74,14 @@ export type PerformanceLabelKey =
 
 export type PerformanceLabelDefinition = {
   groupLabel: string;
-  columns: { label: string; key: PerformanceLabelKey; type: "text" | "numeric"; readOnly?: boolean; default: unknown }[];
+  columns: { label: string; key: PerformanceLabelKey; type: "text" | "numeric"; readOnly?: boolean; default: unknown; width?: number }[];
 };
 
 export const performanceColumns: PerformanceLabelDefinition[] = [
   {
     groupLabel: "Performance",
     columns: [
-      { label: "ID", key: "id", type: "text", readOnly: true, default: "" },
+      { label: "ID", key: "id", type: "text", readOnly: true, default: "", width: 200 },
       { label: "Genre", key: "genre", type: "text", default: "" },
       { label: "Piece", key: "piece", type: "text", default: "" },
       { label: "Performance Description", key: "description", type: "text", default: "" },
