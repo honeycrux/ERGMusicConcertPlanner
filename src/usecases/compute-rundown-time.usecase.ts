@@ -7,16 +7,16 @@ export function computeRundownTimeUsecase(rundown: RundownData[]) {
     endTime: DateTime<true> | undefined;
     actualDuration: Duration<true>;
 
-    startTimeString: string | undefined;
-    endTimeString: string | undefined;
-    actualDurationString: string | undefined;
+    startTimeString: string;
+    endTimeString: string;
+    actualDurationString: string;
   }[] = [];
 
   for (const i in rundown) {
     const slotIdx = parseInt(i);
     const currentSlot = rundown[slotIdx];
 
-    let actualDuration: Duration<true>;
+    let actualDuration: Duration<true> = Duration.fromMillis(0); // default to 0
 
     {
       const event = Duration.fromISO(currentSlot.eventDuration);
@@ -30,7 +30,6 @@ export function computeRundownTimeUsecase(rundown: RundownData[]) {
         if (!buffer.isValid) {
           console.error(`Invalid buffer duration at order ${currentSlot.order}: ${currentSlot.bufferDuration} - ${buffer.invalidExplanation}`);
         }
-        actualDuration = Duration.fromMillis(0);
       }
     }
 
@@ -56,8 +55,8 @@ export function computeRundownTimeUsecase(rundown: RundownData[]) {
       startTime,
       endTime,
       actualDuration,
-      startTimeString: startTime?.toFormat("D TT"),
-      endTimeString: endTime?.toFormat("D TT"),
+      startTimeString: startTime?.toFormat("D TT") ?? "unbounded",
+      endTimeString: endTime?.toFormat("D TT") ?? "unbounded",
       actualDurationString: actualDuration.toFormat("hh:mm:ss"),
     });
   }

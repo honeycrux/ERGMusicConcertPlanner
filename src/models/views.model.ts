@@ -19,6 +19,30 @@ export const PreferenceViewSchema = z.object({
 
 export type PreferenceView = z.infer<typeof PreferenceViewSchema>;
 
+export const PerformanceDetailViewSchema = z.object({
+  timeSlot: z.object({
+    order: z.number(),
+    name: z.string(),
+    startTime: z.string(),
+    duration: z.string(),
+  }),
+  performance: z
+    .object({
+      genre: z.string(),
+      applicant: z.object({
+        name: z.string(),
+      }),
+      piece: z.string(),
+      description: z.string(),
+      performerList: z.string(),
+      performerDescription: z.string(),
+      remarks: z.string(),
+    })
+    .nullable(),
+});
+
+export type PerformanceDetailView = z.infer<typeof PerformanceDetailViewSchema>;
+
 export const ApplicantDetailViewSchema = z.object({
   timeSlot: z.object({
     order: z.number(),

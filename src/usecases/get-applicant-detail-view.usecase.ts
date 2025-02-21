@@ -3,7 +3,7 @@ import { DatabaseResponse } from "@/db/db.interface";
 import { ApplicantDetailView, ApplicantDetailViewSchema } from "@/models/views.model";
 import { computeRundownTimeUsecase } from "./compute-rundown-time.usecase";
 
-export async function getApplicantViewUsecase(): Promise<DatabaseResponse<ApplicantDetailView[]>> {
+export async function getApplicantDetailViewUsecase(): Promise<DatabaseResponse<ApplicantDetailView[]>> {
   const rundown = await getAllConcertRundown();
 
   if (!rundown.success) {
@@ -21,8 +21,8 @@ export async function getApplicantViewUsecase(): Promise<DatabaseResponse<Applic
       timeSlot: {
         order: data.order,
         name: data.name,
-        startTime: timeData.startTimeString ?? "unbounded",
-        duration: timeData.actualDurationString ?? "unbounded",
+        startTime: timeData.startTimeString,
+        duration: timeData.actualDurationString,
       },
       performance: data.performance,
     };

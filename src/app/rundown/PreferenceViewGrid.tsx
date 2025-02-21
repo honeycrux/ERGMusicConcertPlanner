@@ -10,12 +10,12 @@ import { HotTable } from "@handsontable/react-wrapper";
 import { PreferenceView } from "@/models/views.model";
 
 const preferenceViewColumns = [
-  { label: "ID", key: "id", type: "text", readOnly: true, default: undefined, width: 220 },
-  { label: "Genre", key: "genre", type: "text", readOnly: true, default: "" },
-  { label: "Applicant Name", key: "applicant.name", type: "text", readOnly: true, default: "" },
-  { label: "Concert Availability", key: "preference.concertAvailability", type: "text", readOnly: true, default: "" },
-  { label: "Rehearsal Availability", key: "preference.rehearsalAvailability", type: "text", readOnly: true, default: "" },
-  { label: "Preference Remarks", key: "preference.preferenceRemarks", type: "text", readOnly: true, default: "" },
+  { title: "ID", data: "id", type: "text", readOnly: true, width: 220 },
+  { title: "Genre", data: "genre", type: "text", readOnly: true },
+  { title: "Applicant Name", data: "applicant.name", type: "text", readOnly: true },
+  { title: "Concert Availability", data: "preference.concertAvailability", type: "text", readOnly: true },
+  { title: "Rehearsal Availability", data: "preference.rehearsalAvailability", type: "text", readOnly: true },
+  { title: "Preference Remarks", data: "preference.preferenceRemarks", type: "text", readOnly: true },
 ];
 
 export function PreferenceViewGrid({ performances }: { performances: PreferenceView[] }) {
@@ -24,15 +24,7 @@ export function PreferenceViewGrid({ performances }: { performances: PreferenceV
       <div className="ht-theme-main pb-2">
         <HotTable
           data={performances}
-          columns={preferenceViewColumns.map((column) => {
-            return {
-              data: column.key,
-              title: column.label,
-              type: column.type,
-              readOnly: column.readOnly,
-              width: column.width,
-            };
-          })}
+          columns={preferenceViewColumns}
           allowInvalid={false}
           allowEmpty={true}
           wordWrap={true}
