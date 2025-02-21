@@ -41,15 +41,15 @@ export const PerformanceDataSchema = z.object({
 
 export type PerformanceData = z.infer<typeof PerformanceDataSchema>;
 
-export const EditPerformanceDataSchema = PerformanceDataSchema.extend({
+export const EditPerformanceSchema = PerformanceDataSchema.extend({
   applicant: PerformanceDataSchema.shape.applicant.partial(),
   preference: PerformanceDataSchema.shape.preference.partial(),
   stageRequirement: PerformanceDataSchema.shape.stageRequirement.partial(),
 }).partial();
 
-export type EditPerformanceData = z.infer<typeof EditPerformanceDataSchema>;
+export type EditPerformance = z.infer<typeof EditPerformanceSchema>;
 
-export type EditPerformanceDataWithId = EditPerformanceData & { id: string };
+export type EditPerformanceWithId = EditPerformance & { id: string };
 
 export type PerformanceColumnKey =
   | "id"

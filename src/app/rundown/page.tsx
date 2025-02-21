@@ -1,4 +1,4 @@
-import { getConcertSlotDataController } from "@/actions/get-rundown-data.controller";
+import { getConcertRundownEditFormController } from "@/actions/get-rundown-edit-form.controller";
 import { LoadingText } from "@/components/common/LoadingText";
 import { Suspense } from "react";
 import { ConcertRundownGrid } from "./ConcertRundownGrid";
@@ -10,8 +10,6 @@ async function PreferenceViewGridWrapper() {
 
   const result = await getPreferenceViewController();
 
-  console.log(result);
-
   if (!result.success) {
     return <div>Error loading data: {result.message}</div>;
   }
@@ -22,13 +20,13 @@ async function PreferenceViewGridWrapper() {
 async function ConcertRundownGridWrapper() {
   "use server";
 
-  const result = await getConcertSlotDataController();
+  const result = await getConcertRundownEditFormController();
 
   if (!result.success) {
     return <div>Error loading data: {result.message}</div>;
   }
 
-  return <ConcertRundownGrid rundownSlots={result.data.rundownSlots} performances={result.data.performances} />;
+  return <ConcertRundownGrid rundown={result.data.rundown} performances={result.data.performances} />;
 }
 
 export default function EditRundownPage() {

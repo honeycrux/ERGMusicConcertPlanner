@@ -1,23 +1,23 @@
 import { z } from "zod";
-import { PreferenceViewSchema } from "./views.model";
+import { PerformanceDataSchema } from "./performance.model";
 
-export const RundownSlotDataSchema = z.object({
+export const RundownDataSchema = z.object({
   id: z.string(),
   order: z.number().int().nonnegative(),
   name: z.string(),
-  startTime: z.date().nullable(),
-  eventDuration: z.number().nonnegative(),
-  bufferDuration: z.number().nonnegative(),
+  startTime: z.string().nullable(),
+  eventDuration: z.string(),
+  bufferDuration: z.string(),
   remarks: z.string(),
 
   updatedAt: z.date(),
 
-  performance: PreferenceViewSchema.nullable(),
+  performance: PerformanceDataSchema.nullable(),
 });
 
-export type RundownSlotData = z.infer<typeof RundownSlotDataSchema>;
+export type RundownData = z.infer<typeof RundownDataSchema>;
 
-export const EditRundownSlotDataSchema = RundownSlotDataSchema.omit({
+export const EditRundownSchema = RundownDataSchema.omit({
   performance: true,
 })
   .partial()
@@ -26,11 +26,11 @@ export const EditRundownSlotDataSchema = RundownSlotDataSchema.omit({
     performanceId: z.string().nullable().optional(),
   });
 
-export type EditRundownSlotData = z.infer<typeof EditRundownSlotDataSchema>;
+export type EditRundown = z.infer<typeof EditRundownSchema>;
 
-export type EditRundownSlotDataWithId = EditRundownSlotData & { id: string };
+export type EditRundownWithId = EditRundown & { id: string };
 
-export type RundownSlotColumnKey =
+export type RundownColumnKey =
   | "id"
   | "order"
   | "name"
@@ -45,19 +45,19 @@ export type RundownSlotColumnKey =
   | "preference.rehearsalAvailability"
   | "preference.preferenceRemarks";
 
-export type RundownSlotColumnGroupDefinition = {
+export type RundownColumnGroupDefinition = {
   groupLabel: string;
-  columns: { label: string; key: RundownSlotColumnKey; type: "text" | "numeric" | "time" | "dropdown"; readOnly?: boolean; default: unknown; width?: number }[];
+  columns: { label: string; key: RundownColumnKey; type: "text" | "numeric" | "time" | "dropdown"; readOnly?: boolean; default: unknown; width?: number }[];
 };
 
-export const rundownSlotColumnGroups: RundownSlotColumnGroupDefinition[] = [
+export const rundownColumnGroups: RundownColumnGroupDefinition[] = [
   {
     groupLabel: "Time Slot",
     columns: [
       { label: "ID", key: "id", type: "text", readOnly: true, default: "", width: 200 },
       { label: "Order", key: "order", type: "numeric", readOnly: true, default: "" },
       { label: "Name", key: "name", type: "text", default: "" },
-      { label: "Start Time", key: "startTime", type: "time", default: null },
+      { label: "Start Time", key: "startTime", type: "numeric", default: null },
       { label: "Event Duration", key: "eventDuration", type: "numeric", default: undefined },
       { label: "Buffer Duration", key: "bufferDuration", type: "numeric", default: undefined },
       { label: "Remarks", key: "remarks", type: "text", default: "" },

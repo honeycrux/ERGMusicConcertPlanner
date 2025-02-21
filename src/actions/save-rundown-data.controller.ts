@@ -1,12 +1,6 @@
 "use server";
 
-import {
-  EditRundownSlotData,
-  EditRundownSlotDataSchema,
-  rundownSlotColumnGroups,
-  RundownSlotColumnGroupDefinition,
-  RundownSlotColumnKey,
-} from "@/models/rundown.model";
+import { EditRundown, EditRundownSchema, rundownColumnGroups, RundownColumnGroupDefinition, RundownColumnKey } from "@/models/rundown.model";
 import { saveConcertSlotDataUsecase } from "@/usecases/save-rundown-data.usecase";
 import { revalidatePath } from "next/cache";
 
@@ -14,7 +8,7 @@ function isEmptyCell(cell: unknown): boolean {
   return cell === undefined || cell === null || cell === "";
 }
 
-function extractValueFromRow(row: unknown[], allColumns: RundownSlotColumnGroupDefinition["columns"], key: RundownSlotColumnKey): unknown {
+function extractValueFromRow(row: unknown[], allColumns: RundownColumnGroupDefinition["columns"], key: RundownColumnKey): unknown {
   const columnIndex = allColumns.findIndex((column) => column.key === key);
 
   if (columnIndex === -1) {
@@ -35,9 +29,9 @@ function extractValueFromRow(row: unknown[], allColumns: RundownSlotColumnGroupD
 
 export async function saveConcertSlotDataController(data: unknown[][]) {
   console.log(data);
-  const allColumns = rundownSlotColumnGroups.flatMap((column) => column.columns);
+  const allColumns = rundownColumnGroups.flatMap((column) => column.columns);
 
-  const newData: EditRundownSlotData[] = [];
+  const newData: EditRundown[] = [];
 
   for (const rowIndex in data) {
     const row = data[rowIndex];
@@ -58,13 +52,13 @@ export async function saveConcertSlotDataController(data: unknown[][]) {
       performanceId: extractValueFromRow(row, allColumns, "performance.id"),
     };
 
-    const { data: parsedData, error, success } = EditRundownSlotDataSchema.safeParse(concertSlot);
+    const { data: parsedData, error, success } = EditRundownSchema.safeParse(concertSlot);
 
     if (!success) {
       console.error("Failed to parse data", error);
       return {
         success: false,
-        message: "Failed to parse data",
+        message: "Failed to parse data ",
       };
     }
 

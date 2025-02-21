@@ -75,13 +75,13 @@ model StageRequirement {
 }
 
 model ConcertSlot {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
   order          Int
-  name           String    @default("")
-  startTime      DateTime?
-  eventDuration  Float     @default(0)
-  bufferDuration Float     @default(0)
-  remarks        String    @default("")
+  name           String  @default("")
+  startTime      String? // ISO 8601 date time string
+  eventDuration  String  @default("PT0S") // ISO 8601 duration string
+  bufferDuration String  @default("PT0S") // ISO 8601 duration string
+  remarks        String  @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -91,13 +91,13 @@ model ConcertSlot {
 }
 
 model RehearsalSlot {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
   order          Int
-  name           String    @default("")
-  startTime      DateTime?
-  eventDuration  Int       @default(0)
-  bufferDuration Int       @default(0)
-  remarks        String    @default("")
+  name           String  @default("")
+  startTime      String? // ISO 8601 date time string
+  eventDuration  String  @default("PT0S") // ISO 8601 duration string
+  bufferDuration String  @default("PT0S") // ISO 8601 duration string
+  remarks        String  @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

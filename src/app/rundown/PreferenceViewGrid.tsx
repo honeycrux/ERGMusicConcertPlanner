@@ -19,7 +19,6 @@ const preferenceViewColumns = [
 ];
 
 export function PreferenceViewGrid({ performances }: { performances: PreferenceView[] }) {
-  console.log(performances);
   return (
     <>
       <div className="ht-theme-main pb-2">
@@ -36,14 +35,11 @@ export function PreferenceViewGrid({ performances }: { performances: PreferenceV
           })}
           allowInvalid={false}
           allowEmpty={true}
-          undo={true}
           wordWrap={true}
           rowHeaders={true}
           colHeaders={true}
           colWidths={150}
-          contextMenu={["remove_row", "undo", "redo"]}
           height="auto"
-          manualRowMove={true}
           licenseKey="non-commercial-and-evaluation"
         />
       </div>

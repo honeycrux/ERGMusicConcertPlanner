@@ -1,8 +1,8 @@
 "use server";
 
 import {
-  EditPerformanceData,
-  EditPerformanceDataSchema,
+  EditPerformance,
+  EditPerformanceSchema,
   performanceColumnGroups,
   PerformanceColumnGroupDefinition,
   PerformanceColumnKey,
@@ -37,7 +37,7 @@ export async function savePerformanceDataController(data: unknown[][]) {
   console.log(data);
   const allColumns = performanceColumnGroups.flatMap((column) => column.columns);
 
-  const newData: EditPerformanceData[] = [];
+  const newData: EditPerformance[] = [];
 
   for (const rowIndex in data) {
     const row = data[rowIndex];
@@ -75,7 +75,7 @@ export async function savePerformanceDataController(data: unknown[][]) {
       },
     };
 
-    const { data: parsedData, error, success } = EditPerformanceDataSchema.safeParse(performance);
+    const { data: parsedData, error, success } = EditPerformanceSchema.safeParse(performance);
 
     if (!success) {
       return {

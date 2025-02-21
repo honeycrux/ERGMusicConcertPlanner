@@ -1,4 +1,4 @@
-import { EditPerformanceData, EditPerformanceDataWithId, PerformanceData, PerformanceDataSchema } from "@/models/performance.model";
+import { EditPerformance, EditPerformanceWithId, PerformanceData, PerformanceDataSchema } from "@/models/performance.model";
 import { prismaClient } from "./db";
 import { DatabaseResponse } from "./db.interface";
 
@@ -26,10 +26,10 @@ export async function getAllPerformances(): Promise<DatabaseResponse<Performance
     };
   }
 
-  const { success, data } = PerformanceDataSchema.array().safeParse(unparsedData);
+  const { success, data, error } = PerformanceDataSchema.array().safeParse(unparsedData);
 
   if (!success) {
-    console.error("Failed to parse data", data);
+    console.error("Failed to parse data", error);
     return {
       success: false,
       message: "Failed to parse data",
@@ -42,7 +42,7 @@ export async function getAllPerformances(): Promise<DatabaseResponse<Performance
   };
 }
 
-export async function createPerformances(data: EditPerformanceData[]): Promise<DatabaseResponse<PerformanceData[]>> {
+export async function createPerformances(data: EditPerformance[]): Promise<DatabaseResponse<PerformanceData[]>> {
   const operations = data.map((performance) => {
     return prismaClient.performance.create({
       data: {
@@ -83,10 +83,10 @@ export async function createPerformances(data: EditPerformanceData[]): Promise<D
     };
   }
 
-  const { success, data: parsedData } = PerformanceDataSchema.array().safeParse(unparsedData);
+  const { success, data: parsedData, error } = PerformanceDataSchema.array().safeParse(unparsedData);
 
   if (!success) {
-    console.error("Failed to parse data", parsedData);
+    console.error("Failed to parse data", error);
     return {
       success: false,
       message: "Failed to parse data",
@@ -99,7 +99,7 @@ export async function createPerformances(data: EditPerformanceData[]): Promise<D
   };
 }
 
-export async function updatePerformances(data: EditPerformanceDataWithId[]): Promise<DatabaseResponse<PerformanceData[]>> {
+export async function updatePerformances(data: EditPerformanceWithId[]): Promise<DatabaseResponse<PerformanceData[]>> {
   if (data.length === 0) {
     return {
       success: true,
@@ -242,10 +242,10 @@ export async function getAllPerformancesWithRundownDetail() {
     };
   }
 
-  const { success, data } = PerformanceDataSchema.array().safeParse(unparsedData);
+  const { success, data, error } = PerformanceDataSchema.array().safeParse(unparsedData);
 
   if (!success) {
-    console.error("Failed to parse data", data);
+    console.error("Failed to parse data", error);
     return {
       success: false,
       message: "Failed to parse data",

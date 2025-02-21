@@ -1,4 +1,4 @@
-import { getPerformanceDataController } from "@/actions/get-performance-data.controller";
+import { getPerformanceEditFormController } from "@/actions/get-performance-edit-form.controller";
 import { LoadingText } from "@/components/common/LoadingText";
 import { PerformanceGrid } from "@/app/performance/PerformanceGrid";
 import { Suspense } from "react";
@@ -6,7 +6,7 @@ import { Suspense } from "react";
 async function PerformanceGridWrapper() {
   "use server";
 
-  const result = await getPerformanceDataController();
+  const result = await getPerformanceEditFormController();
 
   if (!result.success) {
     return <div>Error loading data: {result.message}</div>;

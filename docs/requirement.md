@@ -21,9 +21,9 @@ Features:
     - Edit performance item
     - Delete performance item
 3. "Edit Rundown" Page
-    - Add concert and rehearsal slots that represent performance items and breaks
-    - Edit concert and rehearsal slots order
-    - Delete concert and rehearsal slots
+    - Add concert and rehearsal rundown that represent performance items and breaks
+    - Edit concert and rehearsal rundown order
+    - Delete concert and rehearsal rundown
     - Show summary of rundown, including expected starting and ending time of each item
 
 ## Overview

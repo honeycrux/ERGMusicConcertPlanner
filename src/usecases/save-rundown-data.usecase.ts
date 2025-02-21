@@ -1,38 +1,38 @@
-import { createConcertSlots, deleteConcertSlots } from "@/db/concertslot.repo";
-import { EditRundownSlotData } from "@/models/rundown.model";
-import { getConcertSlotDataUsecase } from "./get-rundown-data.usecase";
+import { createConcertRundown, deleteConcertRundown } from "@/db/concert-rundown.repo";
+import { EditRundown } from "@/models/rundown.model";
+import { getConcertRundownEditFormUsecase } from "./get-rundown-edit-form.usecase";
 
-export async function saveConcertSlotDataUsecase(data: EditRundownSlotData[]): Promise<{ success: boolean; message: string; needToRefresh?: boolean }> {
-  const existingConcertSlots = await getConcertSlotDataUsecase();
+export async function saveConcertSlotDataUsecase(data: EditRundown[]): Promise<{ success: boolean; message: string; needToRefresh?: boolean }> {
+  const existingConcertRundown = await getConcertRundownEditFormUsecase();
 
-  if (!existingConcertSlots.success) {
+  if (!existingConcertRundown.success) {
     return {
       success: false,
-      message: "Failed to get existing concert slots",
+      message: "Failed to get existing concert rundown",
     };
   }
 
-  const deleteResults = await deleteConcertSlots(existingConcertSlots.data.map((concertSlot) => concertSlot.id));
+  const deleteResults = await deleteConcertRundown(existingConcertRundown.data.map((concertSlot) => concertSlot.id));
 
   if (!deleteResults.success) {
     return {
       success: false,
-      message: "Failed to delete existing concert slots",
+      message: "Failed to delete existing concert rundown",
     };
   }
 
-  const createResults = await createConcertSlots(data);
+  const createResults = await createConcertRundown(data);
 
   if (!createResults.success) {
     return {
       success: false,
-      message: "Failed to create concert slots",
+      message: "Failed to create concert rundown",
     };
   }
 
   return {
     success: true,
-    message: `Successfully saved concert slots.`,
+    message: `Successfully saved concert rundown.`,
     needToRefresh: true,
   };
 }

@@ -7,11 +7,12 @@ import { registerAllModules } from "handsontable/registry";
 registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
-import { performanceColumnGroups, PerformanceData } from "@/models/performance.model";
+import { performanceColumnGroups } from "@/models/performance.model";
 import { ReactElement, useRef, useState } from "react";
 import { savePerformanceDataController } from "@/actions/save-performance-data.controller";
+import { PerformanceEditForm } from "@/models/views.model";
 
-export function PerformanceGrid({ data }: { data: PerformanceData[] }) {
+export function PerformanceGrid({ data }: { data: PerformanceEditForm[] }) {
   const hotRef = useRef<HotTableRef>(null);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
 

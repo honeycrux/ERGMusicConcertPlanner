@@ -1,28 +1,17 @@
-import { EditRundownSlotData, RundownSlotData, RundownSlotDataSchema } from "@/models/rundown.model";
+import { EditRundown, RundownData, RundownDataSchema } from "@/models/rundown.model";
 import { DatabaseResponse } from "./db.interface";
 import { prismaClient } from "./db";
 
-export async function getAllConcertSlots(): Promise<DatabaseResponse<RundownSlotData[]>> {
+export async function getAllConcertRundown(): Promise<DatabaseResponse<RundownData[]>> {
   let unparsedData;
   try {
     unparsedData = await prismaClient.concertSlot.findMany({
       include: {
         performance: {
-          select: {
-            id: true,
-            genre: true,
-            applicant: {
-              select: {
-                name: true,
-              },
-            },
-            preference: {
-              select: {
-                concertAvailability: true,
-                rehearsalAvailability: true,
-                preferenceRemarks: true,
-              },
-            },
+          include: {
+            stageRequirement: true,
+            preference: true,
+            applicant: true,
           },
         },
       },
@@ -32,22 +21,22 @@ export async function getAllConcertSlots(): Promise<DatabaseResponse<RundownSlot
     });
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Failed to fetch concert slots", error.stack);
+      console.error("Failed to fetch concert rundown", error.stack);
       return {
         success: false,
-        message: "Failed to fetch concert slots " + error.stack,
+        message: "Failed to fetch concert rundown " + error.stack,
       };
     }
     return {
       success: false,
-      message: "Failed to fetch concert slots " + error,
+      message: "Failed to fetch concert rundown " + error,
     };
   }
 
-  const { success, data } = RundownSlotDataSchema.array().safeParse(unparsedData);
+  const { success, data, error } = RundownDataSchema.array().safeParse(unparsedData);
 
   if (!success) {
-    console.error("Failed to parse data", data);
+    console.error("Failed to parse data", error);
     return {
       success: false,
       message: "Failed to parse data",
@@ -60,7 +49,7 @@ export async function getAllConcertSlots(): Promise<DatabaseResponse<RundownSlot
   };
 }
 
-export async function createConcertSlots(data: EditRundownSlotData[]): Promise<DatabaseResponse<RundownSlotData[]>> {
+export async function createConcertRundown(data: EditRundown[]): Promise<DatabaseResponse<RundownData[]>> {
   const operations = data.map((slot) => {
     console.log("slot.performanceId", slot.performanceId);
     return prismaClient.concertSlot.create({
@@ -78,15 +67,10 @@ export async function createConcertSlots(data: EditRundownSlotData[]): Promise<D
       },
       include: {
         performance: {
-          select: {
-            id: true,
-            genre: true,
-            piece: true,
-            applicant: {
-              select: {
-                name: true,
-              },
-            },
+          include: {
+            stageRequirement: true,
+            preference: true,
+            applicant: true,
           },
         },
       },
@@ -98,22 +82,22 @@ export async function createConcertSlots(data: EditRundownSlotData[]): Promise<D
     unparsedData = await prismaClient.$transaction(operations);
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Failed to create concert slots", error.stack);
+      console.error("Failed to create concert rundown", error.stack);
       return {
         success: false,
-        message: "Failed to create concert slots " + error.stack,
+        message: "Failed to create concert rundown " + error.stack,
       };
     }
     return {
       success: false,
-      message: "Failed to create concert slots " + error,
+      message: "Failed to create concert rundown " + error,
     };
   }
 
-  const { success, data: parsedData } = RundownSlotDataSchema.array().safeParse(unparsedData);
+  const { success, data: parsedData, error } = RundownDataSchema.array().safeParse(unparsedData);
 
   if (!success) {
-    console.error("Failed to parse data", parsedData);
+    console.error("Failed to parse data", error);
     return {
       success: false,
       message: "Failed to parse data",
@@ -126,7 +110,7 @@ export async function createConcertSlots(data: EditRundownSlotData[]): Promise<D
   };
 }
 
-export async function updateConcertSlots(data: EditRundownSlotData[]): Promise<DatabaseResponse<RundownSlotData[]>> {
+export async function updateConcertRundown(data: EditRundown[]): Promise<DatabaseResponse<RundownData[]>> {
   if (data.length === 0) {
     return {
       success: true,
@@ -159,15 +143,10 @@ export async function updateConcertSlots(data: EditRundownSlotData[]): Promise<D
       },
       include: {
         performance: {
-          select: {
-            id: true,
-            genre: true,
-            piece: true,
-            applicant: {
-              select: {
-                name: true,
-              },
-            },
+          include: {
+            stageRequirement: true,
+            preference: true,
+            applicant: true,
           },
         },
       },
@@ -179,22 +158,22 @@ export async function updateConcertSlots(data: EditRundownSlotData[]): Promise<D
     unparsedData = await prismaClient.$transaction(operations);
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Failed to update concert slots", error.stack);
+      console.error("Failed to update concert rundown", error.stack);
       return {
         success: false,
-        message: "Failed to update concert slots " + error.stack,
+        message: "Failed to update concert rundown " + error.stack,
       };
     }
     return {
       success: false,
-      message: "Failed to update concert slots " + error,
+      message: "Failed to update concert rundown " + error,
     };
   }
 
-  const { success, data: parsedData } = RundownSlotDataSchema.array().safeParse(unparsedData);
+  const { success, data: parsedData, error } = RundownDataSchema.array().safeParse(unparsedData);
 
   if (!success) {
-    console.error("Failed to parse data", parsedData);
+    console.error("Failed to parse data", error);
     return {
       success: false,
       message: "Failed to parse data",
@@ -207,7 +186,7 @@ export async function updateConcertSlots(data: EditRundownSlotData[]): Promise<D
   };
 }
 
-export async function deleteConcertSlots(ids: string[]): Promise<DatabaseResponse<undefined>> {
+export async function deleteConcertRundown(ids: string[]): Promise<DatabaseResponse<undefined>> {
   if (ids.length === 0) {
     return {
       success: true,
@@ -226,15 +205,15 @@ export async function deleteConcertSlots(ids: string[]): Promise<DatabaseRespons
     });
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Failed to delete concert slots", error.stack);
+      console.error("Failed to delete concert rundown", error.stack);
       return {
         success: false,
-        message: "Failed to delete concert slots " + error.stack,
+        message: "Failed to delete concert rundown " + error.stack,
       };
     }
     return {
       success: false,
-      message: "Failed to delete concert slots " + error,
+      message: "Failed to delete concert rundown " + error,
     };
   }
 
