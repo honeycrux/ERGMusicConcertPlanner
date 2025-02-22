@@ -44,24 +44,24 @@ async function ApplicantDetailViewGridWrapper() {
 export default function Home() {
   return (
     <>
-      <h1 className="flex text-xl font-bold p-4">Performance Detail View</h1>
-      <h2 className="flex text-l font-bold px-4 pb-4">Concert</h2>
+      <h1 className="flex text-xl font-bold p-4 pb-2">Performance Detail View</h1>
+      <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
         <PerformanceDetailViewGridWrapper />
       </Suspense>
-      <h2 className="flex text-l font-bold px-4 pb-4">Rehearsal</h2>
-      <h1 className="flex text-xl font-bold p-4">Stage Requirement View</h1>
-      <h2 className="flex text-l font-bold px-4 pb-4">Concert</h2>
+      <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
+      <h1 className="flex text-xl font-bold p-4 pb-2">Stage Requirement View</h1>
+      <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
         <StageRequirementViewGridWrapper />
       </Suspense>
-      <h2 className="flex text-l font-bold px-4 pb-4">Rehearsal</h2>
-      <h1 className="flex text-xl font-bold p-4">Applicant Detail View</h1>
-      <h2 className="flex text-l font-bold px-4 pb-4">Concert</h2>
+      <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
+      <h1 className="flex text-xl font-bold p-4 pb-2">Applicant Detail View</h1>
+      <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
         <ApplicantDetailViewGridWrapper />
       </Suspense>
-      <h2 className="flex text-l font-bold px-4 pb-4">Rehearsal</h2>
+      <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
     </>
   );
 }

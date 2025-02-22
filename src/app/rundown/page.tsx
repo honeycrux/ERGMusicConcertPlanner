@@ -1,7 +1,7 @@
 import { getConcertRundownEditFormController } from "@/actions/get-rundown-edit-form.controller";
 import { LoadingText } from "@/components/common/LoadingText";
 import { Suspense } from "react";
-import { ConcertRundownGrid } from "./ConcertRundownGrid";
+import { RundownEditGrid } from "./RundownEditGrid";
 import { getPreferenceViewController } from "@/actions/get-views.controller";
 import { PreferenceViewGrid } from "./PreferenceViewGrid";
 
@@ -26,22 +26,26 @@ async function ConcertRundownGridWrapper() {
     return <div>Error loading data: {result.message}</div>;
   }
 
-  return <ConcertRundownGrid rundown={result.data.rundown} performances={result.data.performances} />;
+  return <RundownEditGrid rundown={result.data.rundown} performances={result.data.performances} />;
 }
 
 export default function EditRundownPage() {
   return (
     <>
-      <h1 className="flex text-xl font-bold p-4">Preference View</h1>
+      <h1 className="flex text-xl font-bold p-4 pb-2">Preference View</h1>
       <Suspense fallback={<LoadingText />}>
         <PreferenceViewGridWrapper />
       </Suspense>
-      <h1 className="flex text-xl font-bold p-4">Rundown</h1>
-      <h2 className="flex text-l font-bold px-4 pb-4">Concert</h2>
+      <h1 className="flex text-xl font-bold p-4 pb-2">Rundown Edit Area</h1>
+      <div className="flex flex-col items-center py-2 px-4 mx-4 my-2 text-sm border border-zinc-400 text-zinc-800 rounded-md">
+        <div>Start Time should be represented in ISO 8601 datetime format (2025-01-01T12:00:00+08:00 means 1/1/2025 12:00:00 in UTC+8)</div>
+        <div>Event Duration and Buffer Duration should be represented in ISO 8601 duration format (PT3M3S means 3 mins and 3 secs)</div>
+      </div>
+      <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
         <ConcertRundownGridWrapper />
       </Suspense>
-      <h2 className="flex text-l font-bold px-4 pb-4">Rehearsal</h2>
+      <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
       <Suspense fallback={<LoadingText />}></Suspense>
     </>
   );

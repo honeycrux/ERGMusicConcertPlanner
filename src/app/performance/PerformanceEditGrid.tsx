@@ -8,11 +8,60 @@ registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { ReactElement, useRef, useState } from "react";
-import { rundownColumnGroups } from "@/models/rundown.model";
-import { saveConcertSlotDataController } from "@/actions/save-rundown-data.controller";
-import { PreferenceView, RundownEditForm } from "@/models/views.model";
+import { PerformanceColumnKey, savePerformanceDataController } from "@/actions/save-performance-data.controller";
+import { PerformanceEditForm } from "@/models/views.model";
 
-export function ConcertRundownGrid({ rundown, performances }: { rundown: RundownEditForm[]; performances: PreferenceView[] }) {
+export type PerformanceColumnGroupDefinition = {
+  groupLabel: string;
+  columns: { label: string; key: PerformanceColumnKey; type: "text" | "numeric"; readOnly?: boolean; width?: number }[];
+};
+
+export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
+  {
+    groupLabel: "Performance",
+    columns: [
+      { label: "ID", key: "id", type: "text", readOnly: true, width: 200 },
+      { label: "Genre", key: "genre", type: "text" },
+      { label: "Piece", key: "piece", type: "text" },
+      { label: "Performance Description", key: "description", type: "text" },
+      { label: "Performer List", key: "performerList", type: "text" },
+      { label: "Performer Description", key: "performerDescription", type: "text" },
+      { label: "General Remarks", key: "remarks", type: "text" },
+    ],
+  },
+  {
+    groupLabel: "Applicant",
+    columns: [
+      { label: "Applicant Name", key: "applicant.name", type: "text" },
+      { label: "Applicant Email", key: "applicant.email", type: "text" },
+      { label: "Applicant Phone", key: "applicant.phone", type: "text" },
+      { label: "Applicant Remarks", key: "applicant.applicantRemarks", type: "text" },
+    ],
+  },
+  {
+    groupLabel: "Preference",
+    columns: [
+      { label: "Concert Availability", key: "preference.concertAvailability", type: "text" },
+      { label: "Rehearsal Availability", key: "preference.rehearsalAvailability", type: "text" },
+      { label: "Preference Remarks", key: "preference.preferenceRemarks", type: "text" },
+    ],
+  },
+  {
+    groupLabel: "Stage Requirements",
+    columns: [
+      { label: "Chair Count", key: "stageRequirement.chairCount", type: "numeric" },
+      { label: "Music Stand Count", key: "stageRequirement.musicStandCount", type: "numeric" },
+      { label: "Microphone Count", key: "stageRequirement.microphoneCount", type: "numeric" },
+      { label: "Provided Equipment", key: "stageRequirement.providedEquipment", type: "text" },
+      { label: "Self Equipment", key: "stageRequirement.selfEquipment", type: "text" },
+      { label: "Stage Remarks", key: "stageRequirement.stageRemarks", type: "text" },
+    ],
+  },
+];
+
+const performanceKeyOrder = performanceColumnGroups.flatMap((column) => column.columns.map((column) => column.key));
+
+export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
   const hotRef = useRef<HotTableRef>(null);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
 
@@ -81,7 +130,7 @@ export function ConcertRundownGrid({ rundown, performances }: { rundown: Rundown
     }
     const data = hot.getData();
     console.log(data);
-    const result = await saveConcertSlotDataController(data);
+    const result = await savePerformanceDataController(data, performanceKeyOrder);
     if (!result.success) {
       displaySystemMessage(result.message, "error");
       return;
@@ -90,23 +139,23 @@ export function ConcertRundownGrid({ rundown, performances }: { rundown: Rundown
   };
 
   const nestedHeaders = [
-    rundownColumnGroups.map((column) => ({
+    performanceColumnGroups.map((column) => ({
       label: column.groupLabel,
       colspan: column.columns.length,
     })),
-    rundownColumnGroups.flatMap((column) => column.columns.map((column) => column.label)),
+    performanceColumnGroups.flatMap((column) => column.columns.map((column) => column.label)),
   ];
 
-  console.log(rundown);
+  console.log(data);
 
   return (
     <>
       <div className="ht-theme-main pb-2">
         <HotTable
           ref={hotRef}
-          data={rundown}
+          data={data}
           nestedHeaders={nestedHeaders}
-          columns={rundownColumnGroups.flatMap((column) => {
+          columns={performanceColumnGroups.flatMap((column) => {
             return column.columns.map((column) => {
               const baseConfig = {
                 data: column.key,
@@ -114,13 +163,6 @@ export function ConcertRundownGrid({ rundown, performances }: { rundown: Rundown
                 readOnly: column.readOnly,
                 width: column.width,
               };
-              if (column.key === "performance.id") {
-                return {
-                  ...baseConfig,
-                  source: ["", ...performances.map((performance) => performance.id)],
-                  type: "dropdown",
-                };
-              }
               return baseConfig;
             });
           })}
@@ -132,8 +174,7 @@ export function ConcertRundownGrid({ rundown, performances }: { rundown: Rundown
           colHeaders={true}
           colWidths={150}
           contextMenu={["remove_row", "undo", "redo"]}
-          // height="auto"
-          manualRowMove={true}
+          height="auto"
           licenseKey="non-commercial-and-evaluation"
         />
       </div>

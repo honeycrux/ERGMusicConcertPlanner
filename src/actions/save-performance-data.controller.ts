@@ -1,41 +1,60 @@
 "use server";
 
-import {
-  EditPerformance,
-  EditPerformanceSchema,
-  performanceColumnGroups,
-  PerformanceColumnGroupDefinition,
-  PerformanceColumnKey,
-} from "@/models/performance.model";
+import { EditPerformance, EditPerformanceSchema } from "@/models/performance.model";
 import { savePerformanceDataUsecase } from "@/usecases/save-performance-data.usecase";
 import { revalidatePath } from "next/cache";
+
+export type PerformanceColumnKey =
+  | "id"
+  | "genre"
+  | "piece"
+  | "description"
+  | "performerList"
+  | "performerDescription"
+  | "remarks"
+  | "applicant.name"
+  | "applicant.email"
+  | "applicant.phone"
+  | "applicant.applicantRemarks"
+  | "preference.concertAvailability"
+  | "preference.rehearsalAvailability"
+  | "preference.preferenceRemarks"
+  | "stageRequirement.chairCount"
+  | "stageRequirement.musicStandCount"
+  | "stageRequirement.microphoneCount"
+  | "stageRequirement.providedEquipment"
+  | "stageRequirement.selfEquipment"
+  | "stageRequirement.stageRemarks";
+
+const performanceKeyDefaults: Record<PerformanceColumnKey, unknown> = {
+  id: "",
+  genre: "",
+  piece: "",
+  description: "",
+  performerList: "",
+  performerDescription: "",
+  remarks: "",
+  "applicant.name": "",
+  "applicant.email": "",
+  "applicant.phone": "",
+  "applicant.applicantRemarks": "",
+  "preference.concertAvailability": "",
+  "preference.rehearsalAvailability": "",
+  "preference.preferenceRemarks": "",
+  "stageRequirement.chairCount": null,
+  "stageRequirement.musicStandCount": null,
+  "stageRequirement.microphoneCount": null,
+  "stageRequirement.providedEquipment": "",
+  "stageRequirement.selfEquipment": "",
+  "stageRequirement.stageRemarks": "",
+};
 
 function isEmptyCell(cell: unknown): boolean {
   return cell === undefined || cell === null || cell === "";
 }
 
-function extractValueFromRow(row: unknown[], allColumns: PerformanceColumnGroupDefinition["columns"], key: PerformanceColumnKey): unknown {
-  const columnIndex = allColumns.findIndex((column) => column.key === key);
-
-  if (columnIndex === -1) {
-    // This should never happen
-    throw new Error(`Column with key ${key} not found`);
-  }
-
-  const columnValue = row[columnIndex];
-  const columnDefinition = allColumns[columnIndex];
-  const { default: defaultValue } = columnDefinition;
-
-  if (isEmptyCell(columnValue)) {
-    return defaultValue;
-  }
-
-  return columnValue;
-}
-
-export async function savePerformanceDataController(data: unknown[][]) {
+export async function savePerformanceDataController(data: unknown[][], keyOrder: PerformanceColumnKey[]) {
   console.log(data);
-  const allColumns = performanceColumnGroups.flatMap((column) => column.columns);
 
   const newData: EditPerformance[] = [];
 
@@ -47,32 +66,38 @@ export async function savePerformanceDataController(data: unknown[][]) {
       continue;
     }
 
+    for (const colIndex in row) {
+      if (isEmptyCell(row[colIndex])) {
+        row[colIndex] = performanceKeyDefaults[keyOrder[colIndex]];
+      }
+    }
+
     const performance = {
-      id: extractValueFromRow(row, allColumns, "id"),
-      genre: extractValueFromRow(row, allColumns, "genre"),
-      piece: extractValueFromRow(row, allColumns, "piece"),
-      description: extractValueFromRow(row, allColumns, "description"),
-      performerList: extractValueFromRow(row, allColumns, "performerList"),
-      performerDescription: extractValueFromRow(row, allColumns, "performerDescription"),
-      remarks: extractValueFromRow(row, allColumns, "remarks"),
+      id: row[keyOrder.indexOf("id")],
+      genre: row[keyOrder.indexOf("genre")],
+      piece: row[keyOrder.indexOf("piece")],
+      description: row[keyOrder.indexOf("description")],
+      performerList: row[keyOrder.indexOf("performerList")],
+      performerDescription: row[keyOrder.indexOf("performerDescription")],
+      remarks: row[keyOrder.indexOf("remarks")],
       applicant: {
-        name: extractValueFromRow(row, allColumns, "applicant.name"),
-        email: extractValueFromRow(row, allColumns, "applicant.email"),
-        phone: extractValueFromRow(row, allColumns, "applicant.phone"),
-        applicantRemarks: extractValueFromRow(row, allColumns, "applicant.applicantRemarks"),
+        name: row[keyOrder.indexOf("applicant.name")],
+        email: row[keyOrder.indexOf("applicant.email")],
+        phone: row[keyOrder.indexOf("applicant.phone")],
+        applicantRemarks: row[keyOrder.indexOf("applicant.applicantRemarks")],
       },
       preference: {
-        concertAvailability: extractValueFromRow(row, allColumns, "preference.concertAvailability"),
-        rehearsalAvailability: extractValueFromRow(row, allColumns, "preference.rehearsalAvailability"),
-        preferenceRemarks: extractValueFromRow(row, allColumns, "preference.preferenceRemarks"),
+        concertAvailability: row[keyOrder.indexOf("preference.concertAvailability")],
+        rehearsalAvailability: row[keyOrder.indexOf("preference.rehearsalAvailability")],
+        preferenceRemarks: row[keyOrder.indexOf("preference.preferenceRemarks")],
       },
       stageRequirement: {
-        chairCount: extractValueFromRow(row, allColumns, "stageRequirement.chairCount"),
-        musicStandCount: extractValueFromRow(row, allColumns, "stageRequirement.musicStandCount"),
-        microphoneCount: extractValueFromRow(row, allColumns, "stageRequirement.microphoneCount"),
-        providedEquipment: extractValueFromRow(row, allColumns, "stageRequirement.providedEquipment"),
-        selfEquipment: extractValueFromRow(row, allColumns, "stageRequirement.selfEquipment"),
-        stageRemarks: extractValueFromRow(row, allColumns, "stageRequirement.stageRemarks"),
+        chairCount: row[keyOrder.indexOf("stageRequirement.chairCount")],
+        musicStandCount: row[keyOrder.indexOf("stageRequirement.musicStandCount")],
+        microphoneCount: row[keyOrder.indexOf("stageRequirement.microphoneCount")],
+        providedEquipment: row[keyOrder.indexOf("stageRequirement.providedEquipment")],
+        selfEquipment: row[keyOrder.indexOf("stageRequirement.selfEquipment")],
+        stageRemarks: row[keyOrder.indexOf("stageRequirement.stageRemarks")],
       },
     };
 

@@ -29,9 +29,9 @@ const stageRequirementViewColumnGroups = [
   {
     groupLabel: "Stage Requirement",
     columns: [
-      { title: "#Chairs", data: "performance.stageRequirement.chairCount", type: "text", editor: false },
-      { title: "#Stands", data: "performance.stageRequirement.standCount", type: "text", editor: false },
-      { title: "#Mics", data: "performance.stageRequirement.micCount", type: "text", editor: false },
+      { title: "#Chairs", data: "performance.stageRequirement.chairCount", type: "numeric", editor: false },
+      { title: "#Stands", data: "performance.stageRequirement.standCount", type: "numeric", editor: false },
+      { title: "#Mics", data: "performance.stageRequirement.micCount", type: "numeric", editor: false },
       { title: "Provided", data: "performance.stageRequirement.providedEquipment", type: "text", editor: false },
       { title: "Self", data: "performance.stageRequirement.selfEquipment", type: "text", editor: false },
       { title: "Remarks", data: "performance.stageRequirement.remarks", type: "text", editor: false },
@@ -64,6 +64,7 @@ export function StageRequirementViewGrid({ performances }: { performances: Stage
           persistentState={true}
           manualRowResize={true}
           manualColumnResize={true}
+          fillHandle={false}
           height="auto"
           licenseKey="non-commercial-and-evaluation"
         />

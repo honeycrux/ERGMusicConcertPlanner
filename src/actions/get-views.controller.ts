@@ -49,9 +49,9 @@ export async function getStageRequirementViewController(): Promise<DatabaseRespo
             name: "",
           },
           stageRequirement: {
-            chairCount: 0,
-            musicStandCount: 0,
-            microphoneCount: 0,
+            chairCount: null,
+            musicStandCount: null,
+            microphoneCount: null,
             providedEquipment: "",
             selfEquipment: "",
             stageRemarks: "",

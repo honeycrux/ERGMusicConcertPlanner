@@ -7,12 +7,44 @@ import { registerAllModules } from "handsontable/registry";
 registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
-import { performanceColumnGroups } from "@/models/performance.model";
 import { ReactElement, useRef, useState } from "react";
-import { savePerformanceDataController } from "@/actions/save-performance-data.controller";
-import { PerformanceEditForm } from "@/models/views.model";
+import { RundownColumnKey, saveConcertSlotDataController } from "@/actions/save-rundown-data.controller";
+import { PreferenceView, RundownEditForm } from "@/models/views.model";
 
-export function PerformanceGrid({ data }: { data: PerformanceEditForm[] }) {
+type RundownColumnGroupDefinition = {
+  groupLabel: string;
+  columns: { title: string; data: RundownColumnKey; type: string; readOnly?: boolean; width?: number }[];
+};
+
+const rundownColumnGroups: RundownColumnGroupDefinition[] = [
+  {
+    groupLabel: "Time Slot",
+    columns: [
+      { title: "ID", data: "id", type: "text", readOnly: true, width: 200 },
+      { title: "Order", data: "order", type: "numeric", readOnly: true },
+      { title: "Name", data: "name", type: "text" },
+      { title: "Start Time", data: "startTime", type: "text" },
+      { title: "Event Duration", data: "eventDuration", type: "text" },
+      { title: "Buffer Duration", data: "bufferDuration", type: "text" },
+      { title: "Remarks", data: "remarks", type: "text" },
+    ],
+  },
+  {
+    groupLabel: "Performance",
+    columns: [
+      { title: "ID", data: "performance.id", type: "dropdown", width: 220 },
+      { title: "Genre", data: "performance.genre", type: "text", readOnly: true },
+      { title: "Applicant Name", data: "performance.applicant.name", type: "text", readOnly: true },
+      { title: "Concert Availability", data: "preference.concertAvailability", type: "text", readOnly: true },
+      { title: "Rehearsal Availability", data: "preference.rehearsalAvailability", type: "text", readOnly: true },
+      { title: "Preference Remarks", data: "preference.preferenceRemarks", type: "text", readOnly: true },
+    ],
+  },
+];
+
+const rundownKeyOrder = rundownColumnGroups.flatMap((column) => column.columns.map((column) => column.data));
+
+export function RundownEditGrid({ rundown, performances }: { rundown: RundownEditForm[]; performances: PreferenceView[] }) {
   const hotRef = useRef<HotTableRef>(null);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
 
@@ -81,7 +113,7 @@ export function PerformanceGrid({ data }: { data: PerformanceEditForm[] }) {
     }
     const data = hot.getData();
     console.log(data);
-    const result = await savePerformanceDataController(data);
+    const result = await saveConcertSlotDataController(data, rundownKeyOrder);
     if (!result.success) {
       displaySystemMessage(result.message, "error");
       return;
@@ -90,30 +122,32 @@ export function PerformanceGrid({ data }: { data: PerformanceEditForm[] }) {
   };
 
   const nestedHeaders = [
-    performanceColumnGroups.map((column) => ({
+    rundownColumnGroups.map((column) => ({
       label: column.groupLabel,
       colspan: column.columns.length,
     })),
-    performanceColumnGroups.flatMap((column) => column.columns.map((column) => column.label)),
+    rundownColumnGroups.flatMap((column) => column.columns.map((column) => column.title)),
   ];
 
-  console.log(data);
+  console.log(rundown);
 
   return (
     <>
       <div className="ht-theme-main pb-2">
         <HotTable
           ref={hotRef}
-          data={data}
+          data={rundown}
           nestedHeaders={nestedHeaders}
-          columns={performanceColumnGroups.flatMap((column) => {
+          columns={rundownColumnGroups.flatMap((column) => {
             return column.columns.map((column) => {
-              const baseConfig = {
-                data: column.key,
-                type: column.type,
-                readOnly: column.readOnly,
-                width: column.width,
-              };
+              const baseConfig = column;
+              if (column.data === "performance.id") {
+                return {
+                  ...baseConfig,
+                  source: ["", ...performances.map((performance) => performance.id)],
+                  type: "dropdown",
+                };
+              }
               return baseConfig;
             });
           })}
@@ -125,7 +159,8 @@ export function PerformanceGrid({ data }: { data: PerformanceEditForm[] }) {
           colHeaders={true}
           colWidths={150}
           contextMenu={["remove_row", "undo", "redo"]}
-          height="auto"
+          // height="auto"
+          manualRowMove={true}
           licenseKey="non-commercial-and-evaluation"
         />
       </div>

@@ -1,6 +1,6 @@
 import { getPerformanceEditFormController } from "@/actions/get-performance-edit-form.controller";
 import { LoadingText } from "@/components/common/LoadingText";
-import { PerformanceGrid } from "@/app/performance/PerformanceGrid";
+import { PerformanceEditGrid } from "@/app/performance/PerformanceEditGrid";
 import { Suspense } from "react";
 
 async function PerformanceGridWrapper() {
@@ -12,13 +12,16 @@ async function PerformanceGridWrapper() {
     return <div>Error loading data: {result.message}</div>;
   }
 
-  return <PerformanceGrid data={result.data} />;
+  return <PerformanceEditGrid data={result.data} />;
 }
 
 export default function EditPerformancePage() {
   return (
-    <Suspense fallback={<LoadingText />}>
-      <PerformanceGridWrapper />
-    </Suspense>
+    <>
+      <h1 className="flex text-xl font-bold p-4 pb-2">Performance Edit Area</h1>
+      <Suspense fallback={<LoadingText />}>
+        <PerformanceGridWrapper />
+      </Suspense>
+    </>
   );
 }

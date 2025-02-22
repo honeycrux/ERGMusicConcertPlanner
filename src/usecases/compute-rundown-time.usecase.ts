@@ -19,8 +19,8 @@ export function computeRundownTimeUsecase(rundown: RundownData[]) {
     let actualDuration: Duration<true> = Duration.fromMillis(0); // default to 0
 
     {
-      const event = Duration.fromISO(currentSlot.eventDuration);
-      const buffer = Duration.fromISO(currentSlot.bufferDuration);
+      const event = Duration.fromISO(currentSlot.eventDuration ?? "PT0S");
+      const buffer = Duration.fromISO(currentSlot.bufferDuration ?? "PT0S");
       if (event.isValid && buffer.isValid) {
         actualDuration = event.plus(buffer);
       } else {

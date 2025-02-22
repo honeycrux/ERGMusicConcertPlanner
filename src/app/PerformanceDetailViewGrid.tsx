@@ -62,6 +62,7 @@ export function PerformanceDetailViewGrid({ performances }: { performances: Perf
           persistentState={true}
           manualRowResize={true}
           manualColumnResize={true}
+          fillHandle={false}
           height="auto"
           licenseKey="non-commercial-and-evaluation"
         />

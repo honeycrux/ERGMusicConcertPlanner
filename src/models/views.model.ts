@@ -58,9 +58,9 @@ export const StageRequirementViewSchema = z.object({
         name: z.string(),
       }),
       stageRequirement: z.object({
-        chairCount: z.number(),
-        musicStandCount: z.number(),
-        microphoneCount: z.number(),
+        chairCount: z.number().int().nonnegative().nullable(),
+        musicStandCount: z.number().int().nonnegative().nullable(),
+        microphoneCount: z.number().int().nonnegative().nullable(),
         providedEquipment: z.string(),
         selfEquipment: z.string(),
         stageRemarks: z.string(),

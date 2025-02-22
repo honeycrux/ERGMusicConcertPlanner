@@ -60,6 +60,7 @@ export function ApplicantDetailViewGrid({ performances }: { performances: Applic
           persistentState={true}
           manualRowResize={true}
           manualColumnResize={true}
+          fillHandle={false}
           height="auto"
           licenseKey="non-commercial-and-evaluation"
         />

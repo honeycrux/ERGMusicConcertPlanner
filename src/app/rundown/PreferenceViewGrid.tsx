@@ -31,6 +31,7 @@ export function PreferenceViewGrid({ performances }: { performances: PreferenceV
           rowHeaders={true}
           colHeaders={true}
           colWidths={150}
+          fillHandle={false}
           height="auto"
           licenseKey="non-commercial-and-evaluation"
         />

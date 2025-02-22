@@ -1,35 +1,46 @@
 "use server";
 
-import { EditRundown, EditRundownSchema, rundownColumnGroups, RundownColumnGroupDefinition, RundownColumnKey } from "@/models/rundown.model";
+import { EditRundown, EditRundownSchema } from "@/models/rundown.model";
 import { saveConcertSlotDataUsecase } from "@/usecases/save-rundown-data.usecase";
 import { revalidatePath } from "next/cache";
+
+export type RundownColumnKey =
+  | "id"
+  | "order"
+  | "name"
+  | "startTime"
+  | "eventDuration"
+  | "bufferDuration"
+  | "remarks"
+  | "performance.id"
+  | "performance.genre"
+  | "performance.applicant.name"
+  | "preference.concertAvailability"
+  | "preference.rehearsalAvailability"
+  | "preference.preferenceRemarks";
+
+const rundownKeyDefaults: Record<RundownColumnKey, unknown> = {
+  id: "",
+  order: "",
+  name: "",
+  startTime: null,
+  eventDuration: null,
+  bufferDuration: null,
+  remarks: "",
+  "performance.id": undefined,
+  "performance.genre": "",
+  "performance.applicant.name": "",
+  "preference.concertAvailability": "",
+  "preference.rehearsalAvailability": "",
+  "preference.preferenceRemarks": "",
+};
 
 function isEmptyCell(cell: unknown): boolean {
   return cell === undefined || cell === null || cell === "";
 }
 
-function extractValueFromRow(row: unknown[], allColumns: RundownColumnGroupDefinition["columns"], key: RundownColumnKey): unknown {
-  const columnIndex = allColumns.findIndex((column) => column.key === key);
-
-  if (columnIndex === -1) {
-    // This should never happen
-    throw new Error(`Column with key ${key} not found`);
-  }
-
-  const columnValue = row[columnIndex];
-  const columnDefinition = allColumns[columnIndex];
-  const { default: defaultValue } = columnDefinition;
-
-  if (isEmptyCell(columnValue)) {
-    return defaultValue;
-  }
-
-  return columnValue;
-}
-
-export async function saveConcertSlotDataController(data: unknown[][]) {
+export async function saveConcertSlotDataController(data: unknown[][], keyOrder: RundownColumnKey[]) {
   console.log(data);
-  const allColumns = rundownColumnGroups.flatMap((column) => column.columns);
 
   const newData: EditRundown[] = [];
 
@@ -41,15 +52,21 @@ export async function saveConcertSlotDataController(data: unknown[][]) {
       continue;
     }
 
+    for (const colIndex in row) {
+      if (isEmptyCell(row[colIndex])) {
+        row[colIndex] = rundownKeyDefaults[keyOrder[colIndex]];
+      }
+    }
+
     const concertSlot = {
-      id: extractValueFromRow(row, allColumns, "id"),
+      id: row[keyOrder.indexOf("id")],
       order: Number(rowIndex) + 1,
-      name: extractValueFromRow(row, allColumns, "name"),
-      startTime: extractValueFromRow(row, allColumns, "startTime"),
-      eventDuration: extractValueFromRow(row, allColumns, "eventDuration"),
-      bufferDuration: extractValueFromRow(row, allColumns, "bufferDuration"),
-      remarks: extractValueFromRow(row, allColumns, "remarks"),
-      performanceId: extractValueFromRow(row, allColumns, "performance.id"),
+      name: row[keyOrder.indexOf("name")],
+      startTime: row[keyOrder.indexOf("startTime")],
+      eventDuration: row[keyOrder.indexOf("eventDuration")],
+      bufferDuration: row[keyOrder.indexOf("bufferDuration")],
+      remarks: row[keyOrder.indexOf("remarks")],
+      performanceId: row[keyOrder.indexOf("performance.id")],
     };
 
     const { data: parsedData, error, success } = EditRundownSchema.safeParse(concertSlot);
