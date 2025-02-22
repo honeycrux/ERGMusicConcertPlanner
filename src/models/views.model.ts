@@ -43,6 +43,34 @@ export const PerformanceDetailViewSchema = z.object({
 
 export type PerformanceDetailView = z.infer<typeof PerformanceDetailViewSchema>;
 
+export const StageRequirementViewSchema = z.object({
+  timeSlot: z.object({
+    order: z.number(),
+    name: z.string(),
+    startTime: z.string(),
+    duration: z.string(),
+    stageActions: z.string(),
+  }),
+  performance: z
+    .object({
+      genre: z.string(),
+      applicant: z.object({
+        name: z.string(),
+      }),
+      stageRequirement: z.object({
+        chairCount: z.number(),
+        musicStandCount: z.number(),
+        microphoneCount: z.number(),
+        providedEquipment: z.string(),
+        selfEquipment: z.string(),
+        stageRemarks: z.string(),
+      }),
+    })
+    .nullable(),
+});
+
+export type StageRequirementView = z.infer<typeof StageRequirementViewSchema>;
+
 export const ApplicantDetailViewSchema = z.object({
   timeSlot: z.object({
     order: z.number(),

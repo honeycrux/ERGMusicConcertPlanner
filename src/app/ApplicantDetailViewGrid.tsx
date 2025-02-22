@@ -27,7 +27,7 @@ const applicantDetailViewColumnGroups = [
     ],
   },
   {
-    groupLabel: "Applicant Details",
+    groupLabel: "Applicant Detail",
     columns: [
       { title: "Email", data: "performance.applicant.email", type: "text", editor: false },
       { title: "Phone", data: "performance.applicant.phone", type: "text", editor: false },

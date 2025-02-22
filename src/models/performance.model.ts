@@ -32,7 +32,8 @@ export const PerformanceDataSchema = z.object({
     chairCount: z.number().int().nonnegative().nullable(),
     musicStandCount: z.number().int().nonnegative().nullable(),
     microphoneCount: z.number().int().nonnegative().nullable(),
-    otherEquipment: z.string(),
+    providedEquipment: z.string(),
+    selfEquipment: z.string(),
     stageRemarks: z.string(),
 
     updatedAt: z.date(),
@@ -69,7 +70,8 @@ export type PerformanceColumnKey =
   | "stageRequirement.chairCount"
   | "stageRequirement.musicStandCount"
   | "stageRequirement.microphoneCount"
-  | "stageRequirement.otherEquipment"
+  | "stageRequirement.providedEquipment"
+  | "stageRequirement.selfEquipment"
   | "stageRequirement.stageRemarks";
 
 export type PerformanceColumnGroupDefinition = {
@@ -113,7 +115,8 @@ export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
       { label: "Chair Count", key: "stageRequirement.chairCount", type: "numeric", default: null },
       { label: "Music Stand Count", key: "stageRequirement.musicStandCount", type: "numeric", default: null },
       { label: "Microphone Count", key: "stageRequirement.microphoneCount", type: "numeric", default: null },
-      { label: "Other Equipment", key: "stageRequirement.otherEquipment", type: "text", default: "" },
+      { label: "Provided Equipment", key: "stageRequirement.providedEquipment", type: "text", default: "" },
+      { label: "Self Equipment", key: "stageRequirement.selfEquipment", type: "text", default: "" },
       { label: "Stage Remarks", key: "stageRequirement.stageRemarks", type: "text", default: "" },
     ],
   },

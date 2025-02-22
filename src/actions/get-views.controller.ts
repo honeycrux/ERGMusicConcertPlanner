@@ -1,10 +1,11 @@
 "use server";
 
 import { DatabaseResponse } from "@/db/db.interface";
-import { ApplicantDetailView, PerformanceDetailView, PreferenceView } from "@/models/views.model";
+import { ApplicantDetailView, PerformanceDetailView, PreferenceView, StageRequirementView } from "@/models/views.model";
 import { getApplicantDetailViewUsecase as getApplicantDetailViewUsecase } from "@/usecases/get-applicant-detail-view.usecase";
 import { getPerformanceDetailViewUsecase } from "@/usecases/get-performance-detail-view.usecase";
 import { getPreferenceViewUsecase } from "@/usecases/get-preference-view.usecase";
+import { getStageRequirementViewUsecase } from "@/usecases/get-stage-requirement-view.usecase";
 
 export async function getPreferenceViewController(): Promise<DatabaseResponse<PreferenceView[]>> {
   const result = await getPreferenceViewUsecase();
@@ -28,6 +29,33 @@ export async function getPerformanceDetailViewController(): Promise<DatabaseResp
           performerList: "",
           performerDescription: "",
           remarks: "",
+        };
+      }
+    }
+  }
+
+  return result;
+}
+
+export async function getStageRequirementViewController(): Promise<DatabaseResponse<StageRequirementView[]>> {
+  const result = await getStageRequirementViewUsecase();
+
+  if (result.success) {
+    for (const view of result.data) {
+      if (view.performance === null) {
+        view.performance = {
+          genre: "",
+          applicant: {
+            name: "",
+          },
+          stageRequirement: {
+            chairCount: 0,
+            musicStandCount: 0,
+            microphoneCount: 0,
+            providedEquipment: "",
+            selfEquipment: "",
+            stageRemarks: "",
+          },
         };
       }
     }

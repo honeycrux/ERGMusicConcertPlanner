@@ -7,9 +7,9 @@ import { registerAllModules } from "handsontable/registry";
 registerAllModules();
 
 import { HotTable } from "@handsontable/react-wrapper";
-import { PerformanceDetailView } from "@/models/views.model";
+import { StageRequirementView } from "@/models/views.model";
 
-const performanceDetailViewColumnGroups = [
+const stageRequirementViewColumnGroups = [
   {
     groupLabel: "Time Slot",
     columns: [
@@ -27,24 +27,26 @@ const performanceDetailViewColumnGroups = [
     ],
   },
   {
-    groupLabel: "Performance Detail",
+    groupLabel: "Stage Requirement",
     columns: [
-      { title: "Piece", data: "performance.piece", type: "text", editor: false },
-      { title: "Performance Description", data: "performance.performanceDescription", type: "text", editor: false },
-      { title: "Performer List", data: "performance.performerList", type: "text", editor: false },
-      { title: "Performer Description", data: "performance.performerDescription", type: "text", editor: false },
-      { title: "General Remarks", data: "performance.generalRemarks", type: "text", editor: false },
+      { title: "#Chairs", data: "performance.stageRequirement.chairCount", type: "text", editor: false },
+      { title: "#Stands", data: "performance.stageRequirement.standCount", type: "text", editor: false },
+      { title: "#Mics", data: "performance.stageRequirement.micCount", type: "text", editor: false },
+      { title: "Provided", data: "performance.stageRequirement.providedEquipment", type: "text", editor: false },
+      { title: "Self", data: "performance.stageRequirement.selfEquipment", type: "text", editor: false },
+      { title: "Remarks", data: "performance.stageRequirement.remarks", type: "text", editor: false },
+      { title: "Stage Actions", data: "performance.timeSlot.stageActions", type: "text", editor: false },
     ],
   },
 ];
 
-export function PerformanceDetailViewGrid({ performances }: { performances: PerformanceDetailView[] }) {
+export function StageRequirementViewGrid({ performances }: { performances: StageRequirementView[] }) {
   const nestedHeaders = [
-    performanceDetailViewColumnGroups.map((column) => ({
+    stageRequirementViewColumnGroups.map((column) => ({
       label: column.groupLabel,
       colspan: column.columns.length,
     })),
-    performanceDetailViewColumnGroups.flatMap((column) => column.columns.map((column) => column.title)),
+    stageRequirementViewColumnGroups.flatMap((column) => column.columns.map((column) => column.title)),
   ];
 
   return (
@@ -53,7 +55,7 @@ export function PerformanceDetailViewGrid({ performances }: { performances: Perf
         <HotTable
           data={performances}
           nestedHeaders={nestedHeaders}
-          columns={performanceDetailViewColumnGroups.flatMap((group) => group.columns)}
+          columns={stageRequirementViewColumnGroups.flatMap((group) => group.columns)}
           allowInvalid={false}
           allowEmpty={true}
           wordWrap={true}

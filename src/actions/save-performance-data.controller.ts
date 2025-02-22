@@ -70,7 +70,8 @@ export async function savePerformanceDataController(data: unknown[][]) {
         chairCount: extractValueFromRow(row, allColumns, "stageRequirement.chairCount"),
         musicStandCount: extractValueFromRow(row, allColumns, "stageRequirement.musicStandCount"),
         microphoneCount: extractValueFromRow(row, allColumns, "stageRequirement.microphoneCount"),
-        otherEquipment: extractValueFromRow(row, allColumns, "stageRequirement.otherEquipment"),
+        providedEquipment: extractValueFromRow(row, allColumns, "stageRequirement.providedEquipment"),
+        selfEquipment: extractValueFromRow(row, allColumns, "stageRequirement.selfEquipment"),
         stageRemarks: extractValueFromRow(row, allColumns, "stageRequirement.stageRemarks"),
       },
     };

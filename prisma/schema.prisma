@@ -60,12 +60,13 @@ model Preference {
 }
 
 model StageRequirement {
-  id              String @id @default(auto()) @map("_id") @db.ObjectId
-  chairCount      Int?
-  musicStandCount Int?
-  microphoneCount Int?
-  otherEquipment  String @default("")
-  stageRemarks    String @default("")
+  id                String @id @default(auto()) @map("_id") @db.ObjectId
+  chairCount        Int?
+  musicStandCount   Int?
+  microphoneCount   Int?
+  providedEquipment String @default("")
+  selfEquipment     String @default("")
+  stageRemarks      String @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
