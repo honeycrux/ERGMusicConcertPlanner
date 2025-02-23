@@ -42,6 +42,56 @@ export async function getAllPerformances(): Promise<DatabaseResponse<Performance
   };
 }
 
+export async function getPerformanceById(id: string): Promise<DatabaseResponse<PerformanceData | null>> {
+  let unparsedData;
+  try {
+    unparsedData = await prismaClient.performance.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        applicant: true,
+        preference: true,
+        stageRequirement: true,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to fetch performance", error.stack);
+      return {
+        success: false,
+        message: "Failed to fetch performance " + error.stack,
+      };
+    }
+    return {
+      success: false,
+      message: "Failed to fetch performance " + error,
+    };
+  }
+
+  if (!unparsedData) {
+    return {
+      success: true,
+      data: null,
+    };
+  }
+
+  const { success, data, error } = PerformanceDataSchema.safeParse(unparsedData);
+
+  if (!success) {
+    console.error("Failed to parse data", error);
+    return {
+      success: false,
+      message: "Failed to parse data",
+    };
+  }
+
+  return {
+    success: true,
+    data: data,
+  };
+}
+
 export async function createPerformances(data: EditPerformance[]): Promise<DatabaseResponse<PerformanceData[]>> {
   const operations = data.map((performance) => {
     return prismaClient.performance.create({

@@ -8,12 +8,16 @@ registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { ReactElement, useRef, useState } from "react";
-import { PerformanceColumnKey, savePerformanceDataController } from "@/actions/save-performance-data.controller";
+import { savePerformanceDataController } from "@/actions/save-performance-data.controller";
 import { PerformanceEditForm } from "@/models/views.model";
+import { PerformanceControlKey } from "@/models/performance.model";
+import { CellChange, ChangeSource } from "handsontable/common";
+import { getPerformanceEditFormController } from "@/actions/get-performance-edit-form.controller";
+import { SystemMessage } from "./grid-utils";
 
 export type PerformanceColumnGroupDefinition = {
   groupLabel: string;
-  columns: { label: string; key: PerformanceColumnKey; type: "text" | "numeric"; readOnly?: boolean; width?: number }[];
+  columns: { label: string; key: PerformanceControlKey; type: "text" | "numeric"; readOnly?: boolean; width?: number }[];
 };
 
 export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
@@ -59,36 +63,16 @@ export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
   },
 ];
 
-const performanceKeyOrder = performanceColumnGroups.flatMap((column) => column.columns.map((column) => column.key));
+const newRowPrefix = "new-";
+const idAtColumn = 0;
+
+function isUserInputSource(source: ChangeSource | undefined) {
+  return !(source === "loadData" || source === "updateData");
+}
 
 export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
   const hotRef = useRef<HotTableRef>(null);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
-
-  const displaySystemMessage = (message: string, type: "success" | "error" | "default") => {
-    let className: string;
-    switch (type) {
-      case "success":
-        className = "text-green-500";
-        break;
-      case "error":
-        className = "text-red-500";
-        break;
-      default:
-        className = "";
-        break;
-    }
-    const currentDate = new Date();
-    const currentHour = currentDate.getHours().toString().padStart(2, "0");
-    const currentMinute = currentDate.getMinutes().toString().padStart(2, "0");
-    const currentSecond = currentDate.getSeconds().toString().padStart(2, "0");
-    const currentTime = `${currentHour}:${currentMinute}:${currentSecond}`;
-    setSystemMessage(
-      <div className={className}>
-        {currentTime} -- {message}
-      </div>
-    );
-  };
 
   const exportCsvCallback = () => {
     const hot = hotRef.current?.hotInstance;
@@ -115,27 +99,97 @@ export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
   const addRowCallback = () => {
     const hot = hotRef.current?.hotInstance;
     if (!hot) {
-      displaySystemMessage("Failed to add row: Hot instance not found.", "error");
+      setSystemMessage(<SystemMessage message="Failed to add row: Hot instance not found." type="error" />);
       return;
     }
     hot.alter("insert_row_below", hot.countRows());
   };
 
-  const saveChangesCallback = async () => {
-    setSystemMessage(<div>Saving changes...</div>);
-    const hot = hotRef.current?.hotInstance;
-    if (!hot) {
-      displaySystemMessage("Failed to save changes: Hot instance not found.", "error");
-      return;
+  const fetchUpdatesCallback = async () => {
+    const newResults = await getPerformanceEditFormController();
+    if (newResults.success) {
+      hotRef.current?.hotInstance?.updateData(newResults.data);
     }
-    const data = hot.getData();
-    console.log(data);
-    const result = await savePerformanceDataController(data, performanceKeyOrder);
-    if (!result.success) {
-      displaySystemMessage(result.message, "error");
-      return;
+    console.log("Table updated");
+  };
+
+  const afterChangeCallback = async (changes: CellChange[]) => {
+    const results = [];
+    for (const change of changes) {
+      const [row, column, oldValue, newValue] = change;
+      const id = hotRef.current?.hotInstance?.getDataAtCell(row, 0);
+      if (typeof column !== "string") {
+        throw new TypeError(`Unexpected column (key) type ${typeof column}, expected string`);
+      }
+      if (typeof id !== "string") {
+        console.error(id);
+        throw new TypeError(`Unexpected id type "${typeof id}", expected string`);
+      }
+      setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
+      if (id.startsWith(newRowPrefix)) {
+        const result = await savePerformanceDataController([
+          {
+            type: "create",
+            key: column,
+            oldValue,
+            newValue,
+            id,
+          },
+        ]);
+        results.push(result);
+      } else {
+        const result = await savePerformanceDataController([
+          {
+            type: "update",
+            key: column,
+            oldValue,
+            newValue,
+            id,
+          },
+        ]);
+        results.push(result);
+      }
     }
-    displaySystemMessage(result.message, "success");
+    if (results.every((result) => result.success)) {
+      setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
+    } else {
+      setSystemMessage(<SystemMessage message={`Some error occurred while saving. ${results.map((value) => value.message).join(", ")}`} type="error" />);
+    }
+    fetchUpdatesCallback();
+  };
+
+  const afterCreateRowCallback = async (index: number, amount: number) => {
+    // rows := [index, index + 1, ..., index + amount - 1]
+    const rows = new Array(amount).fill(index).map((value, index) => value + index);
+    for (const row of rows) {
+      const timestamp = Date.now().toString();
+      hotRef.current?.hotInstance?.setDataAtCell(row, idAtColumn, newRowPrefix + timestamp, "updateData");
+    }
+  };
+
+  const beforeRemoveRowCallback = async (index: number, amount: number) => {
+    // rows := [index, index + 1, ..., index + amount - 1]
+    const rows: number[] = new Array(amount).fill(index).map((value, index) => value + index);
+    for (const row of rows) {
+      const id = hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn);
+      if (typeof id !== "string") {
+        throw new TypeError(`Unexpected id type ${typeof id}, expected string`);
+      }
+      if (id.startsWith(newRowPrefix)) {
+        continue;
+      }
+      setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
+      const result = await savePerformanceDataController([
+        {
+          type: "delete",
+          id,
+        },
+      ]);
+      if (result.success) {
+        setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
+      }
+    }
+    fetchUpdatesCallback();
   };
 
   const nestedHeaders = [
@@ -145,8 +199,6 @@ export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
     })),
     performanceColumnGroups.flatMap((column) => column.columns.map((column) => column.label)),
   ];
-
-  console.log(data);
 
   return (
     <>
@@ -176,6 +228,24 @@ export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
           contextMenu={["remove_row", "undo", "redo"]}
           height="auto"
           licenseKey="non-commercial-and-evaluation"
+          afterChange={(changes, source) => {
+            if (!isUserInputSource(source) || changes === null) {
+              return;
+            }
+            afterChangeCallback(changes);
+          }}
+          afterCreateRow={(index, amount, source) => {
+            if (!isUserInputSource(source)) {
+              return;
+            }
+            afterCreateRowCallback(index, amount);
+          }}
+          beforeRemoveRow={(index, amount, physicalRows, source) => {
+            if (!isUserInputSource(source)) {
+              return;
+            }
+            beforeRemoveRowCallback(index, amount);
+          }}
         />
       </div>
       <div className="flex justify-center">
@@ -184,9 +254,6 @@ export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
         </button>
         <button onClick={() => addRowCallback()} className="bg-zinc-300 border hover:border-zinc-700 text-black py-1 px-5 rounded">
           Add Row
-        </button>
-        <button onClick={() => saveChangesCallback()} className="bg-zinc-300 border hover:border-zinc-700 text-black py-1 px-5 rounded">
-          Save Changes
         </button>
       </div>
       <div className="flex justify-center p-2 text-gray-500">{systemMessage}</div>

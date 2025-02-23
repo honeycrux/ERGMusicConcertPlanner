@@ -8,10 +8,7 @@ export async function getPerformanceEditFormController(): Promise<DatabaseRespon
   const result = await getPerformanceEditFormUsecase();
 
   if (!result.success) {
-    return {
-      success: false,
-      message: "Failed to get performance data",
-    };
+    return result;
   }
 
   return {

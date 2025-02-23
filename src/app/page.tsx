@@ -1,9 +1,9 @@
 import { getApplicantDetailViewController, getPerformanceDetailViewController, getStageRequirementViewController } from "@/actions/get-views.controller";
-import { ApplicantDetailViewGrid } from "./ApplicantDetailViewGrid";
+import { ApplicantDetailViewGrid } from "../components/grid/ApplicantDetailViewGrid";
 import { Suspense } from "react";
 import { LoadingText } from "@/components/common/LoadingText";
-import { PerformanceDetailViewGrid } from "./PerformanceDetailViewGrid";
-import { StageRequirementViewGrid } from "./StageRequirementViewGrid";
+import { PerformanceDetailViewGrid } from "../components/grid/PerformanceDetailViewGrid";
+import { StageRequirementViewGrid } from "../components/grid/StageRequirementViewGrid";
 
 async function PerformanceDetailViewGridWrapper() {
   "use server";

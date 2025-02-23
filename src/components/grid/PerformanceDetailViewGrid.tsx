@@ -33,7 +33,7 @@ const performanceDetailViewColumnGroups = [
       { title: "Performance Description", data: "performance.performanceDescription", type: "text", editor: false },
       { title: "Performer List", data: "performance.performerList", type: "text", editor: false },
       { title: "Performer Description", data: "performance.performerDescription", type: "text", editor: false },
-      { title: "General Remarks", data: "performance.generalRemarks", type: "text", editor: false },
+      { title: "Remarks", data: "performance.generalRemarks", type: "text", editor: false },
     ],
   },
 ];

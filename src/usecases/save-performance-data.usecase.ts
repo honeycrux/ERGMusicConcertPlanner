@@ -1,38 +1,85 @@
-import { createPerformances, deletePerformances } from "@/db/performance.repo";
-import { EditPerformance } from "@/models/performance.model";
-import { getPerformanceEditFormUsecase } from "./get-performance-edit-form.usecase";
+import { createPerformances, deletePerformances, getPerformanceById, updatePerformances } from "@/db/performance.repo";
+import { EditPerformance, EditPerformanceWithId, PerformanceControlKey, performanceDataColumns } from "@/models/performance.model";
 
-export async function savePerformanceDataUsecase(data: EditPerformance[]): Promise<{ success: boolean; message: string; needToRefresh?: boolean }> {
-  const existingPerformances = await getPerformanceEditFormUsecase();
+export type DataActionResponse = {
+  processed: boolean;
+  success: boolean;
+  message: string;
+};
 
-  if (!existingPerformances.success) {
-    return {
-      success: false,
-      message: "Failed to get existing performances",
-    };
+type DataAction = { key: string; oldValue: unknown; newValue: unknown };
+
+export async function createPerformanceDataUsecase(actions: DataAction[]): Promise<DataActionResponse> {
+  const editPerformance: EditPerformance = {};
+
+  for (const action of actions) {
+    const key = action.key;
+    if (!(key in performanceDataColumns)) {
+      return { processed: false, success: false, message: `Exception: Unexpected key: ${key}` };
+    }
+    const column = performanceDataColumns[key as PerformanceControlKey];
+    try {
+      column.applyOnCreate({
+        oldValue: action.oldValue,
+        newValue: action.newValue,
+        editData: editPerformance,
+      });
+    } catch (error) {
+      console.error("Failed to apply update", error);
+      return { processed: false, success: false, message: `Failed to apply update: ${error}` };
+    }
   }
 
-  const deleteResults = await deletePerformances(existingPerformances.data.map((performance) => performance.id));
+  const result = await createPerformances([editPerformance]);
 
-  if (!deleteResults.success) {
-    return {
-      success: false,
-      message: "Failed to delete existing performances",
-    };
+  if (!result.success) {
+    return { processed: true, success: false, message: result.message };
+  }
+  return { processed: true, success: true, message: "Successfully created performance data." };
+}
+
+export async function updatePerformanceDataUsecase(actions: DataAction[], id: string) {
+  const editPerformance: EditPerformanceWithId = { id };
+  const databaseResult = await getPerformanceById(id);
+
+  if (!databaseResult.success) {
+    return { processed: false, success: false, message: databaseResult.message };
   }
 
-  const createResults = await createPerformances(data);
+  const databaseRecord = databaseResult.data;
 
-  if (!createResults.success) {
-    return {
-      success: false,
-      message: "Failed to create performances",
-    };
+  for (const action of actions) {
+    const key = action.key;
+    if (!(key in performanceDataColumns)) {
+      return { processed: false, success: false, message: `Exception: Unexpected key: ${key}` };
+    }
+    const column = performanceDataColumns[key as PerformanceControlKey];
+    try {
+      column.applyOnUpdate({
+        oldValue: action.oldValue,
+        newValue: action.newValue,
+        databaseRecord,
+        editData: editPerformance,
+      });
+    } catch (error) {
+      console.error("Failed to apply update", error);
+      return { processed: false, success: false, message: `Failed to apply update: ${error}` };
+    }
   }
 
-  return {
-    success: true,
-    message: `Successfully saved performances.`,
-    needToRefresh: true,
-  };
+  const result = await updatePerformances([editPerformance]);
+
+  if (!result.success) {
+    return { processed: true, success: false, message: result.message };
+  }
+  return { processed: true, success: true, message: "Successfully updated performance data." };
+}
+
+export async function deletePerformanceDataUsecase(id: string) {
+  const result = await deletePerformances([id]);
+
+  if (!result.success) {
+    return { processed: false, success: false, message: result.message };
+  }
+  return { processed: true, success: true, message: "Successfully deleted performance data." };
 }

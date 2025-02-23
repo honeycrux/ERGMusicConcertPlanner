@@ -1,6 +1,6 @@
 import { getPerformanceEditFormController } from "@/actions/get-performance-edit-form.controller";
 import { LoadingText } from "@/components/common/LoadingText";
-import { PerformanceEditGrid } from "@/app/performance/PerformanceEditGrid";
+import { PerformanceEditGrid } from "@/components/grid/PerformanceEditGrid";
 import { Suspense } from "react";
 
 async function PerformanceGridWrapper() {
@@ -18,7 +18,7 @@ async function PerformanceGridWrapper() {
 export default function EditPerformancePage() {
   return (
     <>
-      <h1 className="flex text-xl font-bold p-4 pb-2">Performance Edit Area</h1>
+      <h1 className="flex text-xl font-bold p-4 pb-2">Edit Performance</h1>
       <Suspense fallback={<LoadingText />}>
         <PerformanceGridWrapper />
       </Suspense>

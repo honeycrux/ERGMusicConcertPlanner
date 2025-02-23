@@ -1,123 +1,64 @@
 "use server";
 
-import { EditPerformance, EditPerformanceSchema } from "@/models/performance.model";
-import { savePerformanceDataUsecase } from "@/usecases/save-performance-data.usecase";
-import { revalidatePath } from "next/cache";
+import {
+  createPerformanceDataUsecase,
+  DataActionResponse,
+  deletePerformanceDataUsecase,
+  updatePerformanceDataUsecase,
+} from "@/usecases/save-performance-data.usecase";
+import { getPerformanceEditFormUsecase } from "@/usecases/get-performance-edit-form.usecase";
 
-export type PerformanceColumnKey =
-  | "id"
-  | "genre"
-  | "piece"
-  | "description"
-  | "performerList"
-  | "performerDescription"
-  | "remarks"
-  | "applicant.name"
-  | "applicant.email"
-  | "applicant.phone"
-  | "applicant.applicantRemarks"
-  | "preference.concertAvailability"
-  | "preference.rehearsalAvailability"
-  | "preference.preferenceRemarks"
-  | "stageRequirement.chairCount"
-  | "stageRequirement.musicStandCount"
-  | "stageRequirement.microphoneCount"
-  | "stageRequirement.providedEquipment"
-  | "stageRequirement.selfEquipment"
-  | "stageRequirement.stageRemarks";
-
-const performanceKeyDefaults: Record<PerformanceColumnKey, unknown> = {
-  id: "",
-  genre: "",
-  piece: "",
-  description: "",
-  performerList: "",
-  performerDescription: "",
-  remarks: "",
-  "applicant.name": "",
-  "applicant.email": "",
-  "applicant.phone": "",
-  "applicant.applicantRemarks": "",
-  "preference.concertAvailability": "",
-  "preference.rehearsalAvailability": "",
-  "preference.preferenceRemarks": "",
-  "stageRequirement.chairCount": null,
-  "stageRequirement.musicStandCount": null,
-  "stageRequirement.microphoneCount": null,
-  "stageRequirement.providedEquipment": "",
-  "stageRequirement.selfEquipment": "",
-  "stageRequirement.stageRemarks": "",
-};
-
-function isEmptyCell(cell: unknown): boolean {
-  return cell === undefined || cell === null || cell === "";
-}
-
-export async function savePerformanceDataController(data: unknown[][], keyOrder: PerformanceColumnKey[]) {
-  console.log(data);
-
-  const newData: EditPerformance[] = [];
-
-  for (const rowIndex in data) {
-    const row = data[rowIndex];
-
-    if (row.every((entry) => isEmptyCell(entry))) {
-      // Skip
-      continue;
+type CellAction =
+  | {
+      type: "create" | "update";
+      key: string;
+      oldValue: unknown;
+      newValue: unknown;
+      id: string;
     }
-
-    for (const colIndex in row) {
-      if (isEmptyCell(row[colIndex])) {
-        row[colIndex] = performanceKeyDefaults[keyOrder[colIndex]];
-      }
-    }
-
-    const performance = {
-      id: row[keyOrder.indexOf("id")],
-      genre: row[keyOrder.indexOf("genre")],
-      piece: row[keyOrder.indexOf("piece")],
-      description: row[keyOrder.indexOf("description")],
-      performerList: row[keyOrder.indexOf("performerList")],
-      performerDescription: row[keyOrder.indexOf("performerDescription")],
-      remarks: row[keyOrder.indexOf("remarks")],
-      applicant: {
-        name: row[keyOrder.indexOf("applicant.name")],
-        email: row[keyOrder.indexOf("applicant.email")],
-        phone: row[keyOrder.indexOf("applicant.phone")],
-        applicantRemarks: row[keyOrder.indexOf("applicant.applicantRemarks")],
-      },
-      preference: {
-        concertAvailability: row[keyOrder.indexOf("preference.concertAvailability")],
-        rehearsalAvailability: row[keyOrder.indexOf("preference.rehearsalAvailability")],
-        preferenceRemarks: row[keyOrder.indexOf("preference.preferenceRemarks")],
-      },
-      stageRequirement: {
-        chairCount: row[keyOrder.indexOf("stageRequirement.chairCount")],
-        musicStandCount: row[keyOrder.indexOf("stageRequirement.musicStandCount")],
-        microphoneCount: row[keyOrder.indexOf("stageRequirement.microphoneCount")],
-        providedEquipment: row[keyOrder.indexOf("stageRequirement.providedEquipment")],
-        selfEquipment: row[keyOrder.indexOf("stageRequirement.selfEquipment")],
-        stageRemarks: row[keyOrder.indexOf("stageRequirement.stageRemarks")],
-      },
+  | {
+      type: "delete";
+      id: string;
     };
 
-    const { data: parsedData, error, success } = EditPerformanceSchema.safeParse(performance);
+export async function savePerformanceDataController(actions: CellAction[]) {
+  const results: DataActionResponse[] = [];
 
-    if (!success) {
-      return {
-        success: false,
-        message: `Failed to parse row ${rowIndex}: ${error.message}`,
-      };
+  for (const action of actions) {
+    if (action.type === "create") {
+      const result = await createPerformanceDataUsecase([
+        {
+          key: action.key,
+          oldValue: action.oldValue,
+          newValue: action.newValue,
+        },
+      ]);
+      results.push(result);
+    } else if (action.type === "update") {
+      const result = await updatePerformanceDataUsecase(
+        [
+          {
+            key: action.key,
+            oldValue: action.oldValue,
+            newValue: action.newValue,
+          },
+        ],
+        action.id
+      );
+      results.push(result);
+    } else if (action.type === "delete") {
+      const result = await deletePerformanceDataUsecase(action.id);
+      results.push(result);
+    } else {
+      throw new Error("Unexpected action type");
     }
-
-    newData.push(parsedData);
   }
 
-  const result = await savePerformanceDataUsecase(newData);
-
-  if (result.needToRefresh) {
-    revalidatePath("/performance");
+  if (!results.every((result) => result.processed)) {
+    const messages = results.map((result) => result.message);
+    console.error("Error: Failed to process update action", messages);
+    return { success: false, message: messages.join(", ") };
   }
 
-  return result;
+  return { success: true, message: "Successfully saved performance data." };
 }

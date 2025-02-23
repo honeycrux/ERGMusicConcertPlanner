@@ -10,6 +10,7 @@ import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { ReactElement, useRef, useState } from "react";
 import { RundownColumnKey, saveConcertSlotDataController } from "@/actions/save-rundown-data.controller";
 import { PreferenceView, RundownEditForm } from "@/models/views.model";
+import { SystemMessage } from "./grid-utils";
 
 type RundownColumnGroupDefinition = {
   groupLabel: string;
@@ -32,12 +33,17 @@ const rundownColumnGroups: RundownColumnGroupDefinition[] = [
   {
     groupLabel: "Performance",
     columns: [
-      { title: "ID", data: "performance.id", type: "dropdown", width: 220 },
+      { title: "ID", data: "performance.id", type: "dropdown", width: 240 },
       { title: "Genre", data: "performance.genre", type: "text", readOnly: true },
       { title: "Applicant Name", data: "performance.applicant.name", type: "text", readOnly: true },
+    ],
+  },
+  {
+    groupLabel: "Preference",
+    columns: [
       { title: "Concert Availability", data: "preference.concertAvailability", type: "text", readOnly: true },
       { title: "Rehearsal Availability", data: "preference.rehearsalAvailability", type: "text", readOnly: true },
-      { title: "Preference Remarks", data: "preference.preferenceRemarks", type: "text", readOnly: true },
+      { title: "Remarks", data: "preference.preferenceRemarks", type: "text", readOnly: true },
     ],
   },
 ];
@@ -47,31 +53,6 @@ const rundownKeyOrder = rundownColumnGroups.flatMap((column) => column.columns.m
 export function RundownEditGrid({ rundown, performances }: { rundown: RundownEditForm[]; performances: PreferenceView[] }) {
   const hotRef = useRef<HotTableRef>(null);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
-
-  const displaySystemMessage = (message: string, type: "success" | "error" | "default") => {
-    let className: string;
-    switch (type) {
-      case "success":
-        className = "text-green-500";
-        break;
-      case "error":
-        className = "text-red-500";
-        break;
-      default:
-        className = "";
-        break;
-    }
-    const currentDate = new Date();
-    const currentHour = currentDate.getHours().toString().padStart(2, "0");
-    const currentMinute = currentDate.getMinutes().toString().padStart(2, "0");
-    const currentSecond = currentDate.getSeconds().toString().padStart(2, "0");
-    const currentTime = `${currentHour}:${currentMinute}:${currentSecond}`;
-    setSystemMessage(
-      <div className={className}>
-        {currentTime} -- {message}
-      </div>
-    );
-  };
 
   const exportCsvCallback = () => {
     const hot = hotRef.current?.hotInstance;
@@ -98,7 +79,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
   const addRowCallback = () => {
     const hot = hotRef.current?.hotInstance;
     if (!hot) {
-      displaySystemMessage("Failed to add row: Hot instance not found.", "error");
+      setSystemMessage(<SystemMessage message="Failed to add row: Hot instance not found." type="error" />);
       return;
     }
     hot.alter("insert_row_below", hot.countRows());
@@ -108,17 +89,16 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
     setSystemMessage(<div>Saving changes...</div>);
     const hot = hotRef.current?.hotInstance;
     if (!hot) {
-      displaySystemMessage("Failed to save changes: Hot instance not found.", "error");
+      setSystemMessage(<SystemMessage message="Failed to save changes: Hot instance not found." type="error" />);
       return;
     }
     const data = hot.getData();
-    console.log(data);
     const result = await saveConcertSlotDataController(data, rundownKeyOrder);
     if (!result.success) {
-      displaySystemMessage(result.message, "error");
+      setSystemMessage(<SystemMessage message={result.message} type="error" />);
       return;
     }
-    displaySystemMessage(result.message, "success");
+    setSystemMessage(<SystemMessage message={result.message} type="success" />);
   };
 
   const nestedHeaders = [
@@ -128,8 +108,6 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
     })),
     rundownColumnGroups.flatMap((column) => column.columns.map((column) => column.title)),
   ];
-
-  console.log(rundown);
 
   return (
     <>
@@ -162,6 +140,38 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
           // height="auto"
           manualRowMove={true}
           licenseKey="non-commercial-and-evaluation"
+          afterChange={(changes, source) => {
+            if (source === "loadData") {
+              return;
+            }
+            console.log("change:", changes);
+            console.log("source:", source);
+          }}
+          afterCreateRow={(index, amount, source) => {
+            if (source === "loadData") {
+              return;
+            }
+            console.log("index:", index);
+            console.log("amount:", amount);
+            console.log("source:", source);
+          }}
+          beforeRemoveRow={(index, amount, physicalRows, source) => {
+            if (source === "loadData") {
+              return;
+            }
+            console.log("index:", index);
+            console.log("amount:", amount);
+            console.log("physicalRows:", physicalRows);
+            console.log("source:", source);
+            console.log(hotRef.current?.hotInstance?.getDataAtCell(index, 0));
+          }}
+          afterRowMove={(movedRows, finalIndex, dropIndex, movePossible, orderChanged) => {
+            console.log("movedRows:", movedRows);
+            console.log("finalIndex:", finalIndex);
+            console.log("dropIndex:", dropIndex);
+            console.log("movePossible:", movePossible);
+            console.log("orderChanged:", orderChanged);
+          }}
         />
       </div>
       <div className="flex justify-center">

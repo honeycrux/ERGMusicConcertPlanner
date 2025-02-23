@@ -51,7 +51,6 @@ export async function getAllConcertRundown(): Promise<DatabaseResponse<RundownDa
 
 export async function createConcertRundown(data: EditRundown[]): Promise<DatabaseResponse<RundownData[]>> {
   const operations = data.map((slot) => {
-    console.log("slot.performanceId", slot.performanceId);
     return prismaClient.concertSlot.create({
       data: {
         ...slot,

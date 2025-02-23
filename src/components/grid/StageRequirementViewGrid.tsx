@@ -30,12 +30,12 @@ const stageRequirementViewColumnGroups = [
     groupLabel: "Stage Requirement",
     columns: [
       { title: "#Chairs", data: "performance.stageRequirement.chairCount", type: "numeric", editor: false },
-      { title: "#Stands", data: "performance.stageRequirement.standCount", type: "numeric", editor: false },
-      { title: "#Mics", data: "performance.stageRequirement.micCount", type: "numeric", editor: false },
+      { title: "#Stands", data: "performance.stageRequirement.musicStandCount", type: "numeric", editor: false },
+      { title: "#Mics", data: "performance.stageRequirement.microphoneCount", type: "numeric", editor: false },
       { title: "Provided", data: "performance.stageRequirement.providedEquipment", type: "text", editor: false },
       { title: "Self", data: "performance.stageRequirement.selfEquipment", type: "text", editor: false },
       { title: "Remarks", data: "performance.stageRequirement.remarks", type: "text", editor: false },
-      { title: "Stage Actions", data: "performance.timeSlot.stageActions", type: "text", editor: false },
+      { title: "Stage Actions", data: "timeSlot.stageActions", type: "text", editor: false },
     ],
   },
 ];
