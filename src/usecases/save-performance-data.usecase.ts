@@ -1,13 +1,6 @@
 import { createPerformances, deletePerformances, getPerformanceById, updatePerformances } from "@/db/performance.repo";
 import { EditPerformance, EditPerformanceWithId, PerformanceControlKey, performanceDataColumns } from "@/models/performance.model";
-
-export type DataActionResponse = {
-  processed: boolean;
-  success: boolean;
-  message: string;
-};
-
-type DataAction = { key: string; oldValue: unknown; newValue: unknown };
+import { DataAction, DataActionResponse } from "./data-action.interface";
 
 export async function createPerformanceDataUsecase(actions: DataAction[]): Promise<DataActionResponse> {
   const editPerformance: EditPerformance = {};

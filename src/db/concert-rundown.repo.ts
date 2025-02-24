@@ -1,4 +1,4 @@
-import { EditRundown, RundownData, RundownDataSchema } from "@/models/rundown.model";
+import { EditRundownWithId, EditRundownWithOrder, RundownData, RundownDataSchema } from "@/models/rundown.model";
 import { DatabaseResponse } from "./db.interface";
 import { prismaClient } from "./db";
 
@@ -49,7 +49,61 @@ export async function getAllConcertRundown(): Promise<DatabaseResponse<RundownDa
   };
 }
 
-export async function createConcertRundown(data: EditRundown[]): Promise<DatabaseResponse<RundownData[]>> {
+export async function getConcertRundownById(id: string): Promise<DatabaseResponse<RundownData | null>> {
+  let unparsedData;
+  try {
+    unparsedData = await prismaClient.concertSlot.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        performance: {
+          include: {
+            stageRequirement: true,
+            preference: true,
+            applicant: true,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to fetch concert rundown", error.stack);
+      return {
+        success: false,
+        message: "Failed to fetch concert rundown " + error.stack,
+      };
+    }
+    return {
+      success: false,
+      message: "Failed to fetch concert rundown " + error,
+    };
+  }
+
+  if (!unparsedData) {
+    return {
+      success: true,
+      data: null,
+    };
+  }
+
+  const { success, data, error } = RundownDataSchema.safeParse(unparsedData);
+
+  if (!success) {
+    console.error("Failed to parse data", error);
+    return {
+      success: false,
+      message: "Failed to parse data",
+    };
+  }
+
+  return {
+    success: true,
+    data: data,
+  };
+}
+
+export async function createConcertRundown(data: EditRundownWithOrder[]): Promise<DatabaseResponse<RundownData[]>> {
   const operations = data.map((slot) => {
     return prismaClient.concertSlot.create({
       data: {
@@ -109,7 +163,7 @@ export async function createConcertRundown(data: EditRundown[]): Promise<Databas
   };
 }
 
-export async function updateConcertRundown(data: EditRundown[]): Promise<DatabaseResponse<RundownData[]>> {
+export async function updateConcertRundown(data: EditRundownWithId[]): Promise<DatabaseResponse<RundownData[]>> {
   if (data.length === 0) {
     return {
       success: true,
@@ -227,5 +281,63 @@ export async function deleteConcertRundown(ids: string[]): Promise<DatabaseRespo
   return {
     success: true,
     data: undefined,
+  };
+}
+
+export async function getNormalizedRundownOrdering(): Promise<DatabaseResponse<string[]>> {
+  let result;
+  try {
+    result = await prismaClient.concertSlot.findMany({
+      select: {
+        id: true,
+        order: true,
+      },
+      orderBy: {
+        order: "asc",
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error("Failed to fetch concert rundown order", error.stack);
+      return {
+        success: false,
+        message: "Failed to fetch concert rundown order " + error.stack,
+      };
+    }
+    return {
+      success: false,
+      message: "Failed to fetch concert rundown order " + error,
+    };
+  }
+
+  let valid = true;
+  for (let i = 0; i < result.length; i++) {
+    if (result[i].order !== i + 1) {
+      valid = false;
+      break;
+    }
+  }
+
+  if (!valid) {
+    const updateResult = await updateConcertRundown(
+      result.map((slot) => {
+        return {
+          id: slot.id,
+          order: slot.order,
+        };
+      })
+    );
+
+    if (!updateResult.success) {
+      return {
+        success: false,
+        message: "Failed to normalize order",
+      };
+    }
+  }
+
+  return {
+    success: true,
+    data: result.map((slot) => slot.id),
   };
 }

@@ -1,93 +1,91 @@
 "use server";
 
-import { EditRundown, EditRundownSchema } from "@/models/rundown.model";
-import { saveConcertSlotDataUsecase } from "@/usecases/save-rundown-data.usecase";
-import { revalidatePath } from "next/cache";
+import { DataActionResponse } from "@/usecases/data-action.interface";
+import {
+  createConcertRundownDataUsecase,
+  updateConcertRundownDataUsecase,
+  deleteConcertRundownDataUsecase,
+  reorderConcertRundownUsecase,
+} from "@/usecases/save-rundown-data.usecase";
 
-export type RundownColumnKey =
-  | "id"
-  | "order"
-  | "name"
-  | "startTime"
-  | "eventDuration"
-  | "bufferDuration"
-  | "remarks"
-  | "performance.id"
-  | "performance.genre"
-  | "performance.applicant.name"
-  | "preference.concertAvailability"
-  | "preference.rehearsalAvailability"
-  | "preference.preferenceRemarks";
-
-const rundownKeyDefaults: Record<RundownColumnKey, unknown> = {
-  id: "",
-  order: "",
-  name: "",
-  startTime: null,
-  eventDuration: null,
-  bufferDuration: null,
-  remarks: "",
-  "performance.id": undefined,
-  "performance.genre": "",
-  "performance.applicant.name": "",
-  "preference.concertAvailability": "",
-  "preference.rehearsalAvailability": "",
-  "preference.preferenceRemarks": "",
-};
-
-function isEmptyCell(cell: unknown): boolean {
-  return cell === undefined || cell === null || cell === "";
-}
-
-export async function saveConcertSlotDataController(data: unknown[][], keyOrder: RundownColumnKey[]) {
-  console.log(data);
-
-  const newData: EditRundown[] = [];
-
-  for (const rowIndex in data) {
-    const row = data[rowIndex];
-
-    if (row.every((entry) => isEmptyCell(entry))) {
-      // Skip
-      continue;
+type RundownCellAction =
+  | {
+      type: "create";
+      key: string;
+      oldValue: unknown;
+      newValue: unknown;
+      id: string;
+      oldOrdering: string[];
+      newOrdering: string[];
     }
-
-    for (const colIndex in row) {
-      if (isEmptyCell(row[colIndex])) {
-        row[colIndex] = rundownKeyDefaults[keyOrder[colIndex]];
-      }
+  | {
+      type: "update";
+      key: string;
+      oldValue: unknown;
+      newValue: unknown;
+      id: string;
     }
-
-    const concertSlot = {
-      id: row[keyOrder.indexOf("id")],
-      order: Number(rowIndex) + 1,
-      name: row[keyOrder.indexOf("name")],
-      startTime: row[keyOrder.indexOf("startTime")],
-      eventDuration: row[keyOrder.indexOf("eventDuration")],
-      bufferDuration: row[keyOrder.indexOf("bufferDuration")],
-      remarks: row[keyOrder.indexOf("remarks")],
-      performanceId: row[keyOrder.indexOf("performance.id")],
+  | {
+      type: "reorder";
+      oldOrdering: string[];
+      newOrdering: string[];
+    }
+  | {
+      type: "delete";
+      id: string;
     };
 
-    const { data: parsedData, error, success } = EditRundownSchema.safeParse(concertSlot);
+export async function saveRundownDataController(actions: RundownCellAction[]) {
+  const results: DataActionResponse[] = [];
 
-    if (!success) {
-      console.error("Failed to parse data", error);
-      return {
-        success: false,
-        message: "Failed to parse data ",
-      };
+  for (const action of actions) {
+    if (action.type === "create") {
+      const result = await createConcertRundownDataUsecase(
+        [
+          {
+            key: action.key,
+            oldValue: action.oldValue,
+            newValue: action.newValue,
+          },
+        ],
+        {
+          oldOrdering: action.oldOrdering,
+          newOrdering: action.newOrdering,
+        },
+        action.newOrdering.indexOf(action.id)
+      );
+      results.push(result);
+    } else if (action.type === "update") {
+      const result = await updateConcertRundownDataUsecase(
+        [
+          {
+            key: action.key,
+            oldValue: action.oldValue,
+            newValue: action.newValue,
+          },
+        ],
+        action.id
+      );
+      results.push(result);
+    } else if (action.type === "delete") {
+      const result = await deleteConcertRundownDataUsecase(action.id);
+      results.push(result);
+    } else if (action.type === "reorder") {
+      const result = await reorderConcertRundownUsecase({
+        oldOrdering: action.oldOrdering,
+        newOrdering: action.newOrdering,
+      });
+      results.push(result);
+    } else {
+      throw new Error("Unexpected action type");
     }
-
-    newData.push(parsedData);
-  }
-  console.log(newData);
-
-  const result = await saveConcertSlotDataUsecase(newData);
-
-  if (result.needToRefresh) {
-    revalidatePath("/rundown");
   }
 
-  return result;
+  if (!results.every((result) => result.processed)) {
+    const messages = results.map((result) => result.message);
+    console.error("Error: Failed to process update action", messages);
+    return { success: false, message: messages.join(", ") };
+  }
+
+  return { success: true, message: "Successfully saved concert rundown data." };
 }

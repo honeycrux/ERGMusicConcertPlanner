@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { DataColumn } from "./DataColumn";
-import { AllFieldsUnknown } from "./util-types";
 
 export const PerformanceDataSchema = z.object({
   id: z.string(),
@@ -52,8 +51,6 @@ export const EditPerformanceSchema = PerformanceDataSchema.extend({
 
 export type EditPerformance = z.infer<typeof EditPerformanceSchema>;
 
-export type EditPerformanceUnknown = AllFieldsUnknown<EditPerformance>;
-
 export type EditPerformanceWithId = EditPerformance & { id: string };
 
 export type PerformanceControlKey =
@@ -81,13 +78,8 @@ export type PerformanceControlKey =
 export const performanceDataColumns: Record<PerformanceControlKey, DataColumn<PerformanceData, EditPerformance>> = {
   id: new DataColumn<PerformanceData, EditPerformance>({
     defaultValue: "",
-    getDbModelValue(data) {
-      return data.id;
-    },
-    setEditModelValue(data, sanitizedValue) {
-      const value = EditPerformanceSchema.shape.id.parse(sanitizedValue);
-      data.id = value;
-    },
+    getDbModelValue() {},
+    setEditModelValue() {},
   }),
   genre: new DataColumn<PerformanceData, EditPerformance>({
     defaultValue: "",

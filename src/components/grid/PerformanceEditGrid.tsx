@@ -11,9 +11,10 @@ import { ReactElement, useRef, useState } from "react";
 import { savePerformanceDataController } from "@/actions/save-performance-data.controller";
 import { PerformanceEditForm } from "@/models/views.model";
 import { PerformanceControlKey } from "@/models/performance.model";
-import { CellChange, ChangeSource } from "handsontable/common";
+import { CellChange } from "handsontable/common";
 import { getPerformanceEditFormController } from "@/actions/get-performance-edit-form.controller";
-import { SystemMessage } from "./grid-utils";
+import { SystemMessage } from "./SystemMessage";
+import { isUserInputSource } from "./grid-utils";
 
 export type PerformanceColumnGroupDefinition = {
   groupLabel: string;
@@ -66,12 +67,9 @@ export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
 const newRowPrefix = "new-";
 const idAtColumn = 0;
 
-function isUserInputSource(source: ChangeSource | undefined) {
-  return !(source === "loadData" || source === "updateData");
-}
-
-export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
+export function PerformanceEditGrid({ data: performances }: { data: PerformanceEditForm[] }) {
   const hotRef = useRef<HotTableRef>(null);
+  const [data, setData] = useState<PerformanceEditForm[]>(performances);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
 
   const exportCsvCallback = () => {
@@ -107,8 +105,19 @@ export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
 
   const fetchUpdatesCallback = async () => {
     const newResults = await getPerformanceEditFormController();
+    const hot = hotRef.current?.hotInstance;
+    if (!hot) {
+      setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
+      return;
+    }
     if (newResults.success) {
-      hotRef.current?.hotInstance?.updateData(newResults.data);
+      // We need to remove all rows and call setData because the data does not update correctly if we just call loadData or updateData
+      // - loadData just follows the original data, not the new data
+      // - updateData just follows the current state of the table, not the new data
+      hot.alter("remove_row", 0, hot.countRows(), "updateData");
+      setData(newResults.data);
+    } else {
+      setSystemMessage(<SystemMessage message="Fetch failed." type="error" />);
     }
     console.log("Table updated");
   };
@@ -117,7 +126,7 @@ export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
     const results = [];
     for (const change of changes) {
       const [row, column, oldValue, newValue] = change;
-      const id = hotRef.current?.hotInstance?.getDataAtCell(row, 0);
+      const id = hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn);
       if (typeof column !== "string") {
         throw new TypeError(`Unexpected column (key) type ${typeof column}, expected string`);
       }
@@ -153,7 +162,9 @@ export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
     if (results.every((result) => result.success)) {
       setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
     } else {
-      setSystemMessage(<SystemMessage message={`Some error occurred while saving. ${results.map((value) => value.message).join(", ")}`} type="error" />);
+      const messages = results.map((result) => result.message);
+      console.error("Error: Failed to save changes", messages);
+      setSystemMessage(<SystemMessage message="Failed to save changes." type="error" />);
     }
     fetchUpdatesCallback();
   };
@@ -187,6 +198,8 @@ export function PerformanceEditGrid({ data }: { data: PerformanceEditForm[] }) {
       ]);
       if (result.success) {
         setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
+      } else {
+        setSystemMessage(<SystemMessage message={result.message} type="error" />);
       }
     }
     fetchUpdatesCallback();

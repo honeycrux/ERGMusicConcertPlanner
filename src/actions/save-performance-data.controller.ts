@@ -1,14 +1,9 @@
 "use server";
 
-import {
-  createPerformanceDataUsecase,
-  DataActionResponse,
-  deletePerformanceDataUsecase,
-  updatePerformanceDataUsecase,
-} from "@/usecases/save-performance-data.usecase";
-import { getPerformanceEditFormUsecase } from "@/usecases/get-performance-edit-form.usecase";
+import { DataActionResponse } from "@/usecases/data-action.interface";
+import { createPerformanceDataUsecase, deletePerformanceDataUsecase, updatePerformanceDataUsecase } from "@/usecases/save-performance-data.usecase";
 
-type CellAction =
+type PerformanceCellAction =
   | {
       type: "create" | "update";
       key: string;
@@ -21,7 +16,7 @@ type CellAction =
       id: string;
     };
 
-export async function savePerformanceDataController(actions: CellAction[]) {
+export async function savePerformanceDataController(actions: PerformanceCellAction[]) {
   const results: DataActionResponse[] = [];
 
   for (const action of actions) {
