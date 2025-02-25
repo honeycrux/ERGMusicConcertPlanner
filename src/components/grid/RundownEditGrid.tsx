@@ -7,7 +7,7 @@ import { registerAllModules } from "handsontable/registry";
 registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
-import { ReactElement, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { PreferenceView, RundownEditForm } from "@/models/views.model";
 import { SystemMessage } from "./SystemMessage";
 import { RundownControlKey } from "@/models/rundown.model";
@@ -16,6 +16,8 @@ import { getConcertRundownEditFormController } from "@/actions/get-rundown-edit-
 import { CellChange } from "handsontable/common";
 import { saveRundownDataController } from "@/actions/save-rundown-data.controller";
 import { z } from "zod";
+import { EDITOR_STATE } from "handsontable/editors/baseEditor";
+import { Duration, DateTime } from "luxon";
 
 type RundownColumnGroupDefinition = {
   groupLabel: string;
@@ -65,6 +67,29 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
   const [data, setData] = useState(rundown);
   const [prevOrdering, setPrevOrdering] = useState<string[]>(rundown.map((row) => row.id));
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
+  const updateInterval = Duration.fromObject({ seconds: 15 });
+  const nextUpdate = useRef(DateTime.now().plus(updateInterval));
+
+  useEffect(() => {
+    const timerID = setInterval(() => {
+      const hot = hotRef.current?.hotInstance;
+      if (!hot) {
+        setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
+        return;
+      }
+      if (hot.getActiveEditor()?.state === EDITOR_STATE.EDITING) {
+        return;
+      }
+      if (DateTime.now() > nextUpdate.current) {
+        fetchUpdatesCallback();
+        nextUpdate.current = DateTime.now().plus(updateInterval);
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(timerID);
+    };
+  }, [updateInterval]);
 
   const exportCsvCallback = () => {
     const hot = hotRef.current?.hotInstance;
