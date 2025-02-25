@@ -65,18 +65,11 @@ function arrayEquals<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
-export function RundownEditGrid({
-  rundownType,
-  rundown,
-  performances,
-}: {
-  rundownType: RundownType;
-  rundown: RundownEditForm[];
-  performances: PreferenceView[];
-}) {
+export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
   const hotRef = useRef<HotTableRef>(null);
-  const [data, setData] = useState(rundown);
-  const [prevOrdering, setPrevOrdering] = useState<string[]>(rundown.map((row) => row.id));
+  const [rundown, setRundown] = useState<RundownEditForm[]>([]);
+  const [performances, setPerformances] = useState<PreferenceView[]>([]);
+  const prevOrdering = useRef<string[]>([]);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
   const nextUpdate = useRef(DateTime.now().plus(updateInterval));
 
@@ -110,8 +103,9 @@ export function RundownEditGrid({
       // - loadData just follows the original data, not the new data
       // - updateData just follows the current state of the table, not the new data
       hot.alter("remove_row", 0, hot.countRows(), "updateData");
-      setData(newResults.data.rundown);
-      setPrevOrdering(newResults.data.rundown.map((row) => row.id));
+      setRundown(newResults.data.rundown);
+      setPerformances(newResults.data.performances);
+      prevOrdering.current = newResults.data.rundown.map((row) => row.id);
     } else {
       setSystemMessage(<SystemMessage message="Fetch failed." type="error" />);
     }
@@ -145,7 +139,7 @@ export function RundownEditGrid({
             oldValue,
             newValue,
             id,
-            oldOrdering: prevOrdering,
+            oldOrdering: prevOrdering.current,
             newOrdering: ordering,
           },
         ]);
@@ -164,7 +158,7 @@ export function RundownEditGrid({
       }
     }
     if (results.every((result) => result.success)) {
-      setPrevOrdering(ordering);
+      prevOrdering.current = ordering;
       setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
     } else {
       const messages = results.map((result) => result.message);
@@ -217,19 +211,19 @@ export function RundownEditGrid({
     if (idColumnParseError) {
       throw new TypeError(`Unexpected ID column type ${typeof idColumn}, expected array of string`);
     }
-    if (arrayEquals(ordering, prevOrdering)) {
+    if (arrayEquals(ordering, prevOrdering.current)) {
       return;
     }
     setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
     const result = await saveRundownDataController(rundownType, [
       {
         type: "reorder",
-        oldOrdering: prevOrdering,
+        oldOrdering: prevOrdering.current,
         newOrdering: ordering,
       },
     ]);
     if (result.success) {
-      setPrevOrdering(ordering);
+      prevOrdering.current = ordering;
       setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
     } else {
       setSystemMessage(<SystemMessage message={result.message} type="error" />);
@@ -238,6 +232,8 @@ export function RundownEditGrid({
   };
 
   useEffect(() => {
+    fetchUpdatesCallback();
+
     const timerID = setInterval(() => {
       const hot = hotRef.current?.hotInstance;
       if (!hot) {
@@ -270,7 +266,7 @@ export function RundownEditGrid({
       <div className="ht-theme-main pb-2">
         <HotTable
           ref={hotRef}
-          data={data}
+          data={rundown}
           nestedHeaders={nestedHeaders}
           columns={rundownColumnGroups.flatMap((column) => {
             return column.columns.map((column) => {

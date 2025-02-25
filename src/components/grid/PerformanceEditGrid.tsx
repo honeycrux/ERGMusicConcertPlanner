@@ -71,9 +71,9 @@ const newRowPrefix = "new-";
 const idAtColumn = 0;
 const updateInterval = Duration.fromObject({ seconds: 15 });
 
-export function PerformanceEditGrid({ data: performances }: { data: PerformanceEditForm[] }) {
+export function PerformanceEditGrid() {
   const hotRef = useRef<HotTableRef>(null);
-  const [data, setData] = useState<PerformanceEditForm[]>(performances);
+  const [performances, setPerformances] = useState<PerformanceEditForm[]>([]);
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
   const nextUpdate = useRef(DateTime.now().plus(updateInterval));
 
@@ -107,7 +107,7 @@ export function PerformanceEditGrid({ data: performances }: { data: PerformanceE
       // - loadData just follows the original data, not the new data
       // - updateData just follows the current state of the table, not the new data
       hot.alter("remove_row", 0, hot.countRows(), "updateData");
-      setData(newResults.data);
+      setPerformances(newResults.data);
     } else {
       setSystemMessage(<SystemMessage message="Fetch failed." type="error" />);
     }
@@ -199,6 +199,8 @@ export function PerformanceEditGrid({ data: performances }: { data: PerformanceE
   };
 
   useEffect(() => {
+    fetchUpdatesCallback();
+
     const timerID = setInterval(() => {
       const hot = hotRef.current?.hotInstance;
       if (!hot) {
@@ -231,7 +233,7 @@ export function PerformanceEditGrid({ data: performances }: { data: PerformanceE
       <div className="ht-theme-main pb-2">
         <HotTable
           ref={hotRef}
-          data={data}
+          data={performances}
           nestedHeaders={nestedHeaders}
           columns={performanceColumnGroups.flatMap((column) => {
             return column.columns.map((column) => {
