@@ -11,18 +11,19 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { PreferenceView, RundownEditForm } from "@/models/views.model";
 import { SystemMessage } from "./SystemMessage";
 import { RundownControlKey } from "@/models/rundown.model";
-import { isUserInputSource } from "./grid-utils";
+import { datetimeValidator, durationValidator, exportCsv, isUserInputSource } from "./grid-utils";
 import { getConcertRundownEditFormController } from "@/actions/get-rundown-edit-form.controller";
 import { CellChange } from "handsontable/common";
 import { saveRundownDataController } from "@/actions/save-rundown-data.controller";
 import { z } from "zod";
 import { EDITOR_STATE } from "handsontable/editors/baseEditor";
 import { Duration, DateTime } from "luxon";
-import { ActionButton, exportCsv } from "../common/ActionButton";
+import { ActionButton } from "../common/ActionButton";
+import { BaseValidator } from "handsontable/validators";
 
 type RundownColumnGroupDefinition = {
   groupLabel: string;
-  columns: { title: string; data: RundownControlKey; type: string; readOnly?: boolean; width?: number }[];
+  columns: { title: string; data: RundownControlKey; type: string; readOnly?: boolean; width?: number; validator?: BaseValidator }[];
 };
 
 const rundownColumnGroups: RundownColumnGroupDefinition[] = [
@@ -32,9 +33,9 @@ const rundownColumnGroups: RundownColumnGroupDefinition[] = [
       { title: "ID", data: "id", type: "text", readOnly: true, width: 200 },
       { title: "Order", data: "order", type: "numeric", readOnly: true },
       { title: "Name", data: "name", type: "text" },
-      { title: "Start Time", data: "startTime", type: "text" },
-      { title: "Event Duration", data: "eventDuration", type: "text" },
-      { title: "Buffer Duration", data: "bufferDuration", type: "text" },
+      { title: "Start Time", data: "startTime", type: "text", validator: datetimeValidator },
+      { title: "Event Duration", data: "eventDuration", type: "text", validator: durationValidator },
+      { title: "Buffer Duration", data: "bufferDuration", type: "text", validator: durationValidator },
       { title: "Remarks", data: "remarks", type: "text" },
     ],
   },

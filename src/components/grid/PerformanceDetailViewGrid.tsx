@@ -8,8 +8,9 @@ registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { PerformanceDetailView } from "@/models/views.model";
-import { ActionButton, exportCsv } from "../common/ActionButton";
+import { ActionButton } from "../common/ActionButton";
 import React from "react";
+import { exportCsv } from "./grid-utils";
 
 const performanceDetailViewColumnGroups = [
   {

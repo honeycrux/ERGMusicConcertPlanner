@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { PerformanceDataSchema } from "./performance.model";
 import { DataColumn } from "./DataColumn";
+import { DateTime, Duration } from "luxon";
 
 export const RundownDataSchema = z.object({
   id: z.string(),
@@ -75,6 +76,9 @@ export const rundownDataColumns: Record<RundownControlKey, DataColumn<RundownDat
     },
     setEditModelValue(data, sanitizedValue) {
       const value = EditRundownSchema.shape.startTime.parse(sanitizedValue);
+      if (value && !DateTime.fromISO(value).isValid) {
+        throw new Error(`Invalid ISO datetime ${value}`);
+      }
       data.startTime = value;
     },
   }),
@@ -85,6 +89,9 @@ export const rundownDataColumns: Record<RundownControlKey, DataColumn<RundownDat
     },
     setEditModelValue(data, sanitizedValue) {
       const value = EditRundownSchema.shape.eventDuration.parse(sanitizedValue);
+      if (value && !Duration.fromISO(value).isValid) {
+        throw new Error(`Invalid ISO duration ${value}`);
+      }
       data.eventDuration = value;
     },
   }),
@@ -95,6 +102,9 @@ export const rundownDataColumns: Record<RundownControlKey, DataColumn<RundownDat
     },
     setEditModelValue(data, sanitizedValue) {
       const value = EditRundownSchema.shape.bufferDuration.parse(sanitizedValue);
+      if (value && !Duration.fromISO(value).isValid) {
+        throw new Error(`Invalid ISO duration ${value}`);
+      }
       data.bufferDuration = value;
     },
   }),

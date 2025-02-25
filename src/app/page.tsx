@@ -56,7 +56,7 @@ export default function Home() {
         <StageRequirementViewGridWrapper />
       </Suspense>
       <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
-      <h1 className="flex text-xl font-bold p-4 pb-2">Applicant Detail View</h1>
+      <h1 className="flex text-xl font-bold p-4 pb-2">Applicant Detail & Preference View</h1>
       <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
         <ApplicantDetailViewGridWrapper />

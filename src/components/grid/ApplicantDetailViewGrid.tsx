@@ -9,7 +9,8 @@ registerAllModules();
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { ApplicantDetailView } from "@/models/views.model";
 import React from "react";
-import { ActionButton, exportCsv } from "../common/ActionButton";
+import { ActionButton } from "../common/ActionButton";
+import { exportCsv } from "./grid-utils";
 
 const applicantDetailViewColumnGroups = [
   {
@@ -34,6 +35,14 @@ const applicantDetailViewColumnGroups = [
       { title: "Email", data: "performance.applicant.email", type: "text", editor: false },
       { title: "Phone", data: "performance.applicant.phone", type: "text", editor: false },
       { title: "Remarks", data: "performance.applicant.applicantRemarks", type: "text", editor: false },
+    ],
+  },
+  {
+    groupLabel: "Preference",
+    columns: [
+      { title: "Concert Availability", data: "performance.preference.concertAvailability", type: "text", editor: false },
+      { title: "Rehearsal Availability", data: "performance.preference.rehearsalAvailability", type: "text", editor: false },
+      { title: "Remarks", data: "performance.preference.preferenceRemarks", type: "text", editor: false },
     ],
   },
 ];

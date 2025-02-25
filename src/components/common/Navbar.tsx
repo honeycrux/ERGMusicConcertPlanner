@@ -34,7 +34,7 @@ export const Navbar = () => {
         <div className="flex items-center flex-shrink-0 text-black mr-6">
           <Link href="/">
             <div className="flex items-center p-1 mr-4 ">
-              <Image src="/images/logo.png" alt="Logo" width={130} height={200} className="relative" />
+              <Image src="/images/logo.png" alt="Logo" width={130} height={200} className="relative" priority={true} />
             </div>
           </Link>
           <h1 className="text-xl font-bold text-black">{pageName}</h1>

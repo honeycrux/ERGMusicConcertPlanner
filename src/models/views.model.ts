@@ -87,6 +87,11 @@ export const ApplicantDetailViewSchema = z.object({
         phone: z.string(),
         applicantRemarks: z.string(),
       }),
+      preference: z.object({
+        concertAvailability: z.string(),
+        rehearsalAvailability: z.string(),
+        preferenceRemarks: z.string(),
+      }),
     })
     .nullable(),
 });

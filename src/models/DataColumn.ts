@@ -52,10 +52,11 @@ export class DataColumn<DatabaseModel, EditModel> {
       return ChangeVerdict.REJECT;
     }
     const dbValue = this.config.getDbModelValue(databaseRecord);
-    if (this.equals(sanitizedNewValue, dbValue)) {
+    const sanitizedDbValue = this.sanitizeValue(dbValue);
+    if (this.equals(sanitizedNewValue, sanitizedDbValue)) {
       return ChangeVerdict.NOP;
     }
-    if (!this.equals(sanitizedOldValue, dbValue)) {
+    if (!this.equals(sanitizedOldValue, sanitizedDbValue)) {
       return ChangeVerdict.REJECT;
     }
     return ChangeVerdict.ACCEPT;

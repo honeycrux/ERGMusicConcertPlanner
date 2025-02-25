@@ -9,7 +9,8 @@ registerAllModules();
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { StageRequirementView } from "@/models/views.model";
 import React from "react";
-import { ActionButton, exportCsv } from "../common/ActionButton";
+import { ActionButton } from "../common/ActionButton";
+import { exportCsv } from "./grid-utils";
 
 const stageRequirementViewColumnGroups = [
   {

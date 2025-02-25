@@ -78,6 +78,11 @@ export async function getApplicantDetailViewController(): Promise<DatabaseRespon
             phone: "",
             applicantRemarks: "",
           },
+          preference: {
+            concertAvailability: "",
+            rehearsalAvailability: "",
+            preferenceRemarks: "",
+          },
         };
       }
     }
