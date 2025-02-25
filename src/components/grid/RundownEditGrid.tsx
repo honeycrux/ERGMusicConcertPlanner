@@ -265,12 +265,14 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
           })}
           allowInvalid={false}
           allowEmpty={true}
-          undo={true}
+          // undo={true}
+          undo={false}
           wordWrap={true}
           rowHeaders={true}
           colHeaders={true}
           colWidths={150}
-          contextMenu={["remove_row", "undo", "redo"]}
+          // contextMenu={["remove_row", "undo", "redo"]}
+          contextMenu={["remove_row"]}
           // height="auto"
           manualRowMove={true}
           licenseKey="non-commercial-and-evaluation"

@@ -109,7 +109,7 @@ export const rundownDataColumns: Record<RundownControlKey, DataColumn<RundownDat
     },
   }),
   "performance.id": new DataColumn<RundownData, EditRundown>({
-    defaultValue: undefined,
+    defaultValue: null,
     getDbModelValue(data) {
       return data.performance?.id;
     },
