@@ -1,6 +1,7 @@
 "use server";
 
 import { DatabaseResponse } from "@/db/db.interface";
+import { RundownType } from "@/models/rundown.model";
 import { ApplicantDetailView, PerformanceDetailView, PreferenceView, StageRequirementView } from "@/models/views.model";
 import { getApplicantDetailViewUsecase as getApplicantDetailViewUsecase } from "@/usecases/get-applicant-detail-view.usecase";
 import { getPerformanceDetailViewUsecase } from "@/usecases/get-performance-detail-view.usecase";
@@ -13,8 +14,8 @@ export async function getPreferenceViewController(): Promise<DatabaseResponse<Pr
   return result;
 }
 
-export async function getPerformanceDetailViewController(): Promise<DatabaseResponse<PerformanceDetailView[]>> {
-  const result = await getPerformanceDetailViewUsecase();
+export async function getPerformanceDetailViewController(rundownType: RundownType): Promise<DatabaseResponse<PerformanceDetailView[]>> {
+  const result = await getPerformanceDetailViewUsecase(rundownType);
 
   if (result.success) {
     for (const view of result.data) {
@@ -37,8 +38,8 @@ export async function getPerformanceDetailViewController(): Promise<DatabaseResp
   return result;
 }
 
-export async function getStageRequirementViewController(): Promise<DatabaseResponse<StageRequirementView[]>> {
-  const result = await getStageRequirementViewUsecase();
+export async function getStageRequirementViewController(rundownType: RundownType): Promise<DatabaseResponse<StageRequirementView[]>> {
+  const result = await getStageRequirementViewUsecase(rundownType);
 
   if (result.success) {
     for (const view of result.data) {
@@ -64,8 +65,8 @@ export async function getStageRequirementViewController(): Promise<DatabaseRespo
   return result;
 }
 
-export async function getApplicantDetailViewController(): Promise<DatabaseResponse<ApplicantDetailView[]>> {
-  const result = await getApplicantDetailViewUsecase();
+export async function getApplicantDetailViewController(rundownType: RundownType): Promise<DatabaseResponse<ApplicantDetailView[]>> {
+  const result = await getApplicantDetailViewUsecase(rundownType);
 
   if (result.success) {
     for (const view of result.data) {

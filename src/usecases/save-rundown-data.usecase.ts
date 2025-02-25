@@ -1,21 +1,15 @@
-import {
-  createConcertRundown,
-  deleteConcertRundown,
-  getConcertRundownById,
-  getNormalizedRundownOrdering,
-  updateConcertRundown,
-} from "@/db/concert-rundown.repo";
-import { EditRundown, EditRundownWithId, RundownControlKey, rundownDataColumns } from "@/models/rundown.model";
+import { createRundown, deleteRundown, getRundownById, getNormalizedRundownOrdering, updateRundown } from "@/db/rundown.repo";
+import { EditRundown, EditRundownWithId, RundownControlKey, rundownDataColumns, RundownType } from "@/models/rundown.model";
 import { DataAction, DataActionResponse, OrderingAction } from "./data-action.interface";
 
 function arrayEquals<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
-export async function reorderConcertRundownUsecase(ordering: OrderingAction): Promise<DataActionResponse> {
+export async function reorderRundownUsecase(rundownType: RundownType, ordering: OrderingAction): Promise<DataActionResponse> {
   // Three-way check on the ordering
 
-  const result = await getNormalizedRundownOrdering();
+  const result = await getNormalizedRundownOrdering(rundownType);
   if (!result.success) {
     return { processed: false, success: false, message: result.message };
   }
@@ -42,15 +36,20 @@ export async function reorderConcertRundownUsecase(ordering: OrderingAction): Pr
     editRundownOrdering.push({ id, order: i + 1 });
   }
 
-  const updateResult = await updateConcertRundown(editRundownOrdering);
+  const updateResult = await updateRundown(rundownType, editRundownOrdering);
 
   if (!updateResult.success) {
     return { processed: true, success: false, message: updateResult.message };
   }
-  return { processed: true, success: true, message: "Successfully reordered concert rundown." };
+  return { processed: true, success: true, message: "Successfully reordered rundown." };
 }
 
-export async function createConcertRundownDataUsecase(actions: DataAction[], ordering: OrderingAction, newItemOrderIndex: number): Promise<DataActionResponse> {
+export async function createRundownDataUsecase(
+  rundownType: RundownType,
+  actions: DataAction[],
+  ordering: OrderingAction,
+  newItemOrderIndex: number
+): Promise<DataActionResponse> {
   const editRundown: EditRundown = {};
 
   for (const action of actions) {
@@ -71,14 +70,14 @@ export async function createConcertRundownDataUsecase(actions: DataAction[], ord
     }
   }
 
-  const databaseOrdering = await getNormalizedRundownOrdering();
+  const databaseOrdering = await getNormalizedRundownOrdering(rundownType);
   if (!databaseOrdering.success) {
     return { processed: false, success: false, message: databaseOrdering.message };
   }
   const nextOrderNumber = databaseOrdering.data.length + 1;
   const editRundownWithOrder = { ...editRundown, order: nextOrderNumber };
 
-  const result = await createConcertRundown([editRundownWithOrder]);
+  const result = await createRundown(rundownType, [editRundownWithOrder]);
   if (!result.success) {
     return { processed: true, success: false, message: "Create rundown failed: " + result.message };
   }
@@ -87,7 +86,7 @@ export async function createConcertRundownDataUsecase(actions: DataAction[], ord
   ordering.oldOrdering.push(newlyInsertedId);
   ordering.newOrdering[newItemOrderIndex] = newlyInsertedId;
 
-  const reorderResult = await reorderConcertRundownUsecase({
+  const reorderResult = await reorderRundownUsecase(rundownType, {
     oldOrdering: ordering.oldOrdering,
     newOrdering: ordering.newOrdering,
   });
@@ -95,12 +94,12 @@ export async function createConcertRundownDataUsecase(actions: DataAction[], ord
   if (!reorderResult.success) {
     return { processed: true, success: false, message: "Reorder rundown on create failed: " + reorderResult.message };
   }
-  return { processed: true, success: true, message: "Successfully created concert rundown data." };
+  return { processed: true, success: true, message: "Successfully created rundown data." };
 }
 
-export async function updateConcertRundownDataUsecase(actions: DataAction[], id: string) {
+export async function updateRundownDataUsecase(rundownType: RundownType, actions: DataAction[], id: string) {
   const editRundown: EditRundownWithId = { id };
-  const databaseResult = await getConcertRundownById(id);
+  const databaseResult = await getRundownById(rundownType, id);
 
   if (!databaseResult.success) {
     return { processed: false, success: false, message: databaseResult.message };
@@ -127,19 +126,19 @@ export async function updateConcertRundownDataUsecase(actions: DataAction[], id:
     }
   }
 
-  const result = await updateConcertRundown([editRundown]);
+  const result = await updateRundown(rundownType, [editRundown]);
 
   if (!result.success) {
     return { processed: true, success: false, message: result.message };
   }
-  return { processed: true, success: true, message: "Successfully updated concert rundown data." };
+  return { processed: true, success: true, message: "Successfully updated rundown data." };
 }
 
-export async function deleteConcertRundownDataUsecase(id: string) {
-  const result = await deleteConcertRundown([id]);
+export async function deleteRundownDataUsecase(rundownType: RundownType, id: string) {
+  const result = await deleteRundown(rundownType, [id]);
 
   if (!result.success) {
     return { processed: true, success: false, message: result.message };
   }
-  return { processed: true, success: true, message: "Successfully deleted concert rundown data." };
+  return { processed: true, success: true, message: "Successfully deleted rundown data." };
 }

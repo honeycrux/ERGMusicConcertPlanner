@@ -96,8 +96,8 @@ model RehearsalSlot {
   order          Int
   name           String  @default("")
   startTime      String? // ISO 8601 date time string
-  eventDuration  String  @default("PT0S") // ISO 8601 duration string
-  bufferDuration String  @default("PT0S") // ISO 8601 duration string
+  eventDuration  String? // ISO 8601 duration string
+  bufferDuration String? // ISO 8601 duration string
   remarks        String  @default("")
 
   createdAt DateTime @default(now())

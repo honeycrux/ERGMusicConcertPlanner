@@ -10,9 +10,9 @@ import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { PreferenceView, RundownEditForm } from "@/models/views.model";
 import { SystemMessage } from "./SystemMessage";
-import { RundownControlKey } from "@/models/rundown.model";
+import { RundownControlKey, RundownType } from "@/models/rundown.model";
 import { datetimeValidator, durationValidator, exportCsv, isUserInputSource } from "./grid-utils";
-import { getConcertRundownEditFormController } from "@/actions/get-rundown-edit-form.controller";
+import { getRundownEditFormController } from "@/actions/get-rundown-edit-form.controller";
 import { CellChange } from "handsontable/common";
 import { saveRundownDataController } from "@/actions/save-rundown-data.controller";
 import { z } from "zod";
@@ -65,7 +65,15 @@ function arrayEquals<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
-export function RundownEditGrid({ rundown, performances }: { rundown: RundownEditForm[]; performances: PreferenceView[] }) {
+export function RundownEditGrid({
+  rundownType,
+  rundown,
+  performances,
+}: {
+  rundownType: RundownType;
+  rundown: RundownEditForm[];
+  performances: PreferenceView[];
+}) {
   const hotRef = useRef<HotTableRef>(null);
   const [data, setData] = useState(rundown);
   const [prevOrdering, setPrevOrdering] = useState<string[]>(rundown.map((row) => row.id));
@@ -91,7 +99,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
   };
 
   const fetchUpdatesCallback = useCallback(async () => {
-    const newResults = await getConcertRundownEditFormController();
+    const newResults = await getRundownEditFormController(rundownType);
     const hot = hotRef.current?.hotInstance;
     if (!hot) {
       setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
@@ -107,9 +115,9 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
     } else {
       setSystemMessage(<SystemMessage message="Fetch failed." type="error" />);
     }
-    console.log("Table updated.");
+    console.log(`Table updated (${rundownType}).`);
     nextUpdate.current = DateTime.now().plus(updateInterval);
-  }, []);
+  }, [rundownType]);
 
   const afterChangeCallback = async (changes: CellChange[]) => {
     const results = [];
@@ -130,7 +138,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
       }
       setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
       if (id.startsWith(newRowPrefix)) {
-        const result = await saveRundownDataController([
+        const result = await saveRundownDataController(rundownType, [
           {
             type: "create",
             key: column,
@@ -143,7 +151,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
         ]);
         results.push(result);
       } else {
-        const result = await saveRundownDataController([
+        const result = await saveRundownDataController(rundownType, [
           {
             type: "update",
             key: column,
@@ -187,7 +195,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
         continue;
       }
       setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
-      const result = await saveRundownDataController([
+      const result = await saveRundownDataController(rundownType, [
         {
           type: "delete",
           id,
@@ -213,7 +221,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
       return;
     }
     setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
-    const result = await saveRundownDataController([
+    const result = await saveRundownDataController(rundownType, [
       {
         type: "reorder",
         oldOrdering: prevOrdering,

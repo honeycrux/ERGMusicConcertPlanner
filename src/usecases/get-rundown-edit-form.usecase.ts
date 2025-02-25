@@ -1,9 +1,10 @@
-import { getAllConcertRundown } from "@/db/concert-rundown.repo";
+import { getAllRundown } from "@/db/rundown.repo";
 import { DatabaseResponse } from "@/db/db.interface";
 import { RundownEditForm, RundownEditFormSchema } from "@/models/views.model";
+import { RundownType } from "@/models/rundown.model";
 
-export async function getConcertRundownEditFormUsecase(): Promise<DatabaseResponse<RundownEditForm[]>> {
-  const result = await getAllConcertRundown();
+export async function getRundownEditFormUsecase(rundownType: RundownType): Promise<DatabaseResponse<RundownEditForm[]>> {
+  const result = await getAllRundown(rundownType);
 
   if (!result.success) {
     return result;

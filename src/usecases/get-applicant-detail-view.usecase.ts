@@ -1,15 +1,16 @@
-import { getAllConcertRundown } from "@/db/concert-rundown.repo";
+import { getAllRundown } from "@/db/rundown.repo";
 import { DatabaseResponse } from "@/db/db.interface";
 import { ApplicantDetailView, ApplicantDetailViewSchema } from "@/models/views.model";
 import { computeRundownTimeUsecase } from "./compute-rundown-time.usecase";
+import { RundownType } from "@/models/rundown.model";
 
-export async function getApplicantDetailViewUsecase(): Promise<DatabaseResponse<ApplicantDetailView[]>> {
-  const rundown = await getAllConcertRundown();
+export async function getApplicantDetailViewUsecase(rundownType: RundownType): Promise<DatabaseResponse<ApplicantDetailView[]>> {
+  const rundown = await getAllRundown(rundownType);
 
   if (!rundown.success) {
     return {
       success: false,
-      message: "Failed to get concert rundown",
+      message: "Failed to get rundown",
     };
   }
 

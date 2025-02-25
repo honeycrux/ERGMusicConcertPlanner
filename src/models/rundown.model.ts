@@ -33,6 +33,8 @@ export type EditRundownWithOrder = EditRundown & { order: number };
 
 export type EditRundownWithId = EditRundown & { id: string };
 
+export type RundownType = "concert" | "rehearsal";
+
 export type RundownControlKey =
   | "id"
   | "order"

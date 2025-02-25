@@ -1,12 +1,8 @@
 "use server";
 
+import { RundownType } from "@/models/rundown.model";
 import { DataActionResponse } from "@/usecases/data-action.interface";
-import {
-  createConcertRundownDataUsecase,
-  updateConcertRundownDataUsecase,
-  deleteConcertRundownDataUsecase,
-  reorderConcertRundownUsecase,
-} from "@/usecases/save-rundown-data.usecase";
+import { createRundownDataUsecase, updateRundownDataUsecase, deleteRundownDataUsecase, reorderRundownUsecase } from "@/usecases/save-rundown-data.usecase";
 
 type RundownCellAction =
   | {
@@ -35,12 +31,13 @@ type RundownCellAction =
       id: string;
     };
 
-export async function saveRundownDataController(actions: RundownCellAction[]) {
+export async function saveRundownDataController(rundownType: RundownType, actions: RundownCellAction[]) {
   const results: DataActionResponse[] = [];
 
   for (const action of actions) {
     if (action.type === "create") {
-      const result = await createConcertRundownDataUsecase(
+      const result = await createRundownDataUsecase(
+        rundownType,
         [
           {
             key: action.key,
@@ -56,7 +53,8 @@ export async function saveRundownDataController(actions: RundownCellAction[]) {
       );
       results.push(result);
     } else if (action.type === "update") {
-      const result = await updateConcertRundownDataUsecase(
+      const result = await updateRundownDataUsecase(
+        rundownType,
         [
           {
             key: action.key,
@@ -68,10 +66,10 @@ export async function saveRundownDataController(actions: RundownCellAction[]) {
       );
       results.push(result);
     } else if (action.type === "delete") {
-      const result = await deleteConcertRundownDataUsecase(action.id);
+      const result = await deleteRundownDataUsecase(rundownType, action.id);
       results.push(result);
     } else if (action.type === "reorder") {
-      const result = await reorderConcertRundownUsecase({
+      const result = await reorderRundownUsecase(rundownType, {
         oldOrdering: action.oldOrdering,
         newOrdering: action.newOrdering,
       });
@@ -87,5 +85,5 @@ export async function saveRundownDataController(actions: RundownCellAction[]) {
     return { success: false, message: messages.join(", ") };
   }
 
-  return { success: true, message: "Successfully saved concert rundown data." };
+  return { success: true, message: "Successfully saved rundown data." };
 }

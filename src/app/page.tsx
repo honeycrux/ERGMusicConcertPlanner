@@ -4,11 +4,16 @@ import { Suspense } from "react";
 import { LoadingText } from "@/components/common/LoadingText";
 import { PerformanceDetailViewGrid } from "../components/grid/PerformanceDetailViewGrid";
 import { StageRequirementViewGrid } from "../components/grid/StageRequirementViewGrid";
+import { RundownType } from "@/models/rundown.model";
 
-async function PerformanceDetailViewGridWrapper() {
+type WrapperProps = {
+  rundownType: RundownType;
+};
+
+async function PerformanceDetailViewGridWrapper({ rundownType }: WrapperProps) {
   "use server";
 
-  const result = await getPerformanceDetailViewController();
+  const result = await getPerformanceDetailViewController(rundownType);
 
   if (!result.success) {
     return <div>Error loading data: {result.message}</div>;
@@ -17,10 +22,10 @@ async function PerformanceDetailViewGridWrapper() {
   return <PerformanceDetailViewGrid performances={result.data} />;
 }
 
-async function StageRequirementViewGridWrapper() {
+async function StageRequirementViewGridWrapper({ rundownType }: WrapperProps) {
   "use server";
 
-  const result = await getStageRequirementViewController();
+  const result = await getStageRequirementViewController(rundownType);
 
   if (!result.success) {
     return <div>Error loading data: {result.message}</div>;
@@ -29,10 +34,10 @@ async function StageRequirementViewGridWrapper() {
   return <StageRequirementViewGrid performances={result.data} />;
 }
 
-async function ApplicantDetailViewGridWrapper() {
+async function ApplicantDetailViewGridWrapper({ rundownType }: WrapperProps) {
   "use server";
 
-  const result = await getApplicantDetailViewController();
+  const result = await getApplicantDetailViewController(rundownType);
 
   if (!result.success) {
     return <div>Error loading data: {result.message}</div>;
@@ -47,21 +52,30 @@ export default function Home() {
       <h1 className="flex text-xl font-bold p-4 pb-2">Performance Detail View</h1>
       <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
-        <PerformanceDetailViewGridWrapper />
+        <PerformanceDetailViewGridWrapper rundownType="concert" />
       </Suspense>
       <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
+      <Suspense fallback={<LoadingText />}>
+        <PerformanceDetailViewGridWrapper rundownType="rehearsal" />
+      </Suspense>
       <h1 className="flex text-xl font-bold p-4 pb-2">Stage Requirement View</h1>
       <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
-        <StageRequirementViewGridWrapper />
+        <StageRequirementViewGridWrapper rundownType="concert" />
       </Suspense>
       <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
+      <Suspense fallback={<LoadingText />}>
+        <StageRequirementViewGridWrapper rundownType="rehearsal" />
+      </Suspense>
       <h1 className="flex text-xl font-bold p-4 pb-2">Applicant Detail & Preference View</h1>
       <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
-        <ApplicantDetailViewGridWrapper />
+        <ApplicantDetailViewGridWrapper rundownType="concert" />
       </Suspense>
       <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
+      <Suspense fallback={<LoadingText />}>
+        <ApplicantDetailViewGridWrapper rundownType="rehearsal" />
+      </Suspense>
     </>
   );
 }

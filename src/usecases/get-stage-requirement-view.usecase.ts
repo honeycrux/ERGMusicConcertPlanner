@@ -1,10 +1,10 @@
-import { getAllConcertRundown } from "@/db/concert-rundown.repo";
+import { getAllRundown } from "@/db/rundown.repo";
 import { DatabaseResponse } from "@/db/db.interface";
 import { computeRundownTimeUsecase } from "./compute-rundown-time.usecase";
 import { StageRequirementView, StageRequirementViewSchema } from "@/models/views.model";
-import { RundownData } from "@/models/rundown.model";
+import { RundownData, RundownType } from "@/models/rundown.model";
 
-function computeStageActions(rundown: RundownData[]): string[] {
+function computeStageActionsUsecase(rundown: RundownData[]): string[] {
   const actions: string[] = [];
 
   for (const i in rundown) {
@@ -43,21 +43,21 @@ function computeStageActions(rundown: RundownData[]): string[] {
       .filter((item) => item.length > 0);
 
     if (lastChairCount < currentChairCount) {
-      plusList.push(`${currentChairCount - lastChairCount} chairs`);
+      plusList.push(`${currentChairCount - lastChairCount} chair`);
     } else if (lastChairCount > currentChairCount) {
-      minusList.push(`${lastChairCount - currentChairCount} chairs`);
+      minusList.push(`${lastChairCount - currentChairCount} chair`);
     }
 
     if (lastMusicStandCount < currentMusicStandCount) {
-      plusList.push(`${currentMusicStandCount - lastMusicStandCount} music stands`);
+      plusList.push(`${currentMusicStandCount - lastMusicStandCount} music stand`);
     } else if (lastMusicStandCount > currentMusicStandCount) {
-      minusList.push(`${lastMusicStandCount - currentMusicStandCount} music stands`);
+      minusList.push(`${lastMusicStandCount - currentMusicStandCount} music stand`);
     }
 
     if (lastMicrophoneCount < currentMicrophoneCount) {
-      plusList.push(`${currentMicrophoneCount - lastMicrophoneCount} microphones`);
+      plusList.push(`${currentMicrophoneCount - lastMicrophoneCount} microphone`);
     } else if (lastMicrophoneCount > currentMicrophoneCount) {
-      minusList.push(`${lastMicrophoneCount - currentMicrophoneCount} microphones`);
+      minusList.push(`${lastMicrophoneCount - currentMicrophoneCount} microphone`);
     }
 
     const plusProvidedEquipment = currentProvidedEquipmentList.filter((item) => !lastProvidedEquipmentList.includes(item));
@@ -77,19 +77,19 @@ function computeStageActions(rundown: RundownData[]): string[] {
   return actions;
 }
 
-export async function getStageRequirementViewUsecase(): Promise<DatabaseResponse<StageRequirementView[]>> {
-  const rundown = await getAllConcertRundown();
+export async function getStageRequirementViewUsecase(rundownType: RundownType): Promise<DatabaseResponse<StageRequirementView[]>> {
+  const rundown = await getAllRundown(rundownType);
 
   if (!rundown.success) {
     return {
       success: false,
-      message: "Failed to get concert rundown",
+      message: "Failed to get rundown",
     };
   }
 
   const timeInformation = computeRundownTimeUsecase(rundown.data);
 
-  const stageActions = computeStageActions(rundown.data);
+  const stageActions = computeStageActionsUsecase(rundown.data);
 
   const augmentedData = rundown.data.map((data, idx) => {
     const timeData = timeInformation[idx];

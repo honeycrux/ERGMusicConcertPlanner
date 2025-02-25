@@ -1,12 +1,17 @@
-import { getConcertRundownEditFormController } from "@/actions/get-rundown-edit-form.controller";
 import { LoadingText } from "@/components/common/LoadingText";
 import { Suspense } from "react";
-import { RundownEditGrid } from "../../components/grid/RundownEditGrid";
-import { getPreferenceViewController } from "@/actions/get-views.controller";
-import { PreferenceViewGrid } from "../../components/grid/PreferenceViewGrid";
 import { MessageBox } from "@/components/common/MessageBox";
+import { getRundownEditFormController } from "@/actions/get-rundown-edit-form.controller";
+import { getPreferenceViewController } from "@/actions/get-views.controller";
+import { PreferenceViewGrid } from "@/components/grid/PreferenceViewGrid";
+import { RundownEditGrid } from "@/components/grid/RundownEditGrid";
+import { RundownType } from "@/models/rundown.model";
 
-async function PreferenceViewGridWrapper() {
+type WrapperProps = {
+  rundownType: RundownType;
+};
+
+export async function PreferenceViewGridWrapper() {
   "use server";
 
   const result = await getPreferenceViewController();
@@ -18,16 +23,16 @@ async function PreferenceViewGridWrapper() {
   return <PreferenceViewGrid performances={result.data} />;
 }
 
-async function ConcertRundownGridWrapper() {
+export async function RundownGridWrapper({ rundownType }: WrapperProps) {
   "use server";
 
-  const result = await getConcertRundownEditFormController();
+  const result = await getRundownEditFormController(rundownType);
 
   if (!result.success) {
     return <div>Error loading data: {result.message}</div>;
   }
 
-  return <RundownEditGrid rundown={result.data.rundown} performances={result.data.performances} />;
+  return <RundownEditGrid rundownType={rundownType} rundown={result.data.rundown} performances={result.data.performances} />;
 }
 
 export default function EditRundownPage() {
@@ -45,10 +50,12 @@ export default function EditRundownPage() {
       </MessageBox>
       <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
       <Suspense fallback={<LoadingText />}>
-        <ConcertRundownGridWrapper />
+        <RundownGridWrapper rundownType="concert" />
       </Suspense>
       <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
-      <Suspense fallback={<LoadingText />}></Suspense>
+      <Suspense fallback={<LoadingText />}>
+        <RundownGridWrapper rundownType="rehearsal" />
+      </Suspense>
     </>
   );
 }
