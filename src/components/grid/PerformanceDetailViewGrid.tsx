@@ -6,8 +6,10 @@ import { registerAllModules } from "handsontable/registry";
 
 registerAllModules();
 
-import { HotTable } from "@handsontable/react-wrapper";
+import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { PerformanceDetailView } from "@/models/views.model";
+import { ActionButton, exportCsv } from "../common/ActionButton";
+import React from "react";
 
 const performanceDetailViewColumnGroups = [
   {
@@ -39,6 +41,17 @@ const performanceDetailViewColumnGroups = [
 ];
 
 export function PerformanceDetailViewGrid({ performances }: { performances: PerformanceDetailView[] }) {
+  const hotRef = React.useRef<HotTableRef>(null);
+
+  const exportCsvCallback = () => {
+    const hot = hotRef.current?.hotInstance;
+    if (!hot) {
+      // TODO: Show error message
+      return;
+    }
+    exportCsv(hot, "Performance-Detail");
+  };
+
   const nestedHeaders = [
     performanceDetailViewColumnGroups.map((column) => ({
       label: column.groupLabel,
@@ -51,6 +64,7 @@ export function PerformanceDetailViewGrid({ performances }: { performances: Perf
     <>
       <div className="ht-theme-main pb-2">
         <HotTable
+          ref={hotRef}
           data={performances}
           nestedHeaders={nestedHeaders}
           columns={performanceDetailViewColumnGroups.flatMap((group) => group.columns)}
@@ -66,6 +80,9 @@ export function PerformanceDetailViewGrid({ performances }: { performances: Perf
           height="auto"
           licenseKey="non-commercial-and-evaluation"
         />
+      </div>
+      <div className="px-4">
+        <ActionButton onClick={exportCsvCallback}>Download CSV</ActionButton>
       </div>
     </>
   );

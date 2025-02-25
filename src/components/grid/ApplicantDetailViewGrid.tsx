@@ -6,8 +6,10 @@ import { registerAllModules } from "handsontable/registry";
 
 registerAllModules();
 
-import { HotTable } from "@handsontable/react-wrapper";
+import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { ApplicantDetailView } from "@/models/views.model";
+import React from "react";
+import { ActionButton, exportCsv } from "../common/ActionButton";
 
 const applicantDetailViewColumnGroups = [
   {
@@ -37,6 +39,17 @@ const applicantDetailViewColumnGroups = [
 ];
 
 export function ApplicantDetailViewGrid({ performances }: { performances: ApplicantDetailView[] }) {
+  const hotRef = React.useRef<HotTableRef>(null);
+
+  const exportCsvCallback = () => {
+    const hot = hotRef.current?.hotInstance;
+    if (!hot) {
+      // TODO: Show error message
+      return;
+    }
+    exportCsv(hot, "Applicant-Detail");
+  };
+
   const nestedHeaders = [
     applicantDetailViewColumnGroups.map((column) => ({
       label: column.groupLabel,
@@ -49,6 +62,7 @@ export function ApplicantDetailViewGrid({ performances }: { performances: Applic
     <>
       <div className="ht-theme-main pb-2">
         <HotTable
+          ref={hotRef}
           data={performances}
           nestedHeaders={nestedHeaders}
           columns={applicantDetailViewColumnGroups.flatMap((group) => group.columns)}
@@ -64,6 +78,9 @@ export function ApplicantDetailViewGrid({ performances }: { performances: Applic
           height="auto"
           licenseKey="non-commercial-and-evaluation"
         />
+      </div>
+      <div className="px-4">
+        <ActionButton onClick={exportCsvCallback}>Download CSV</ActionButton>
       </div>
     </>
   );

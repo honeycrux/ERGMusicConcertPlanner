@@ -6,8 +6,10 @@ import { registerAllModules } from "handsontable/registry";
 
 registerAllModules();
 
-import { HotTable } from "@handsontable/react-wrapper";
+import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
 import { StageRequirementView } from "@/models/views.model";
+import React from "react";
+import { ActionButton, exportCsv } from "../common/ActionButton";
 
 const stageRequirementViewColumnGroups = [
   {
@@ -41,6 +43,17 @@ const stageRequirementViewColumnGroups = [
 ];
 
 export function StageRequirementViewGrid({ performances }: { performances: StageRequirementView[] }) {
+  const hotRef = React.useRef<HotTableRef>(null);
+
+  const exportCsvCallback = () => {
+    const hot = hotRef.current?.hotInstance;
+    if (!hot) {
+      // TODO: Show error message
+      return;
+    }
+    exportCsv(hot, "Stage-Requirement");
+  };
+
   const nestedHeaders = [
     stageRequirementViewColumnGroups.map((column) => ({
       label: column.groupLabel,
@@ -53,6 +66,7 @@ export function StageRequirementViewGrid({ performances }: { performances: Stage
     <>
       <div className="ht-theme-main pb-2">
         <HotTable
+          ref={hotRef}
           data={performances}
           nestedHeaders={nestedHeaders}
           columns={stageRequirementViewColumnGroups.flatMap((group) => group.columns)}
@@ -68,6 +82,9 @@ export function StageRequirementViewGrid({ performances }: { performances: Stage
           height="auto"
           licenseKey="non-commercial-and-evaluation"
         />
+      </div>
+      <div className="px-4">
+        <ActionButton onClick={exportCsvCallback}>Download CSV</ActionButton>
       </div>
     </>
   );

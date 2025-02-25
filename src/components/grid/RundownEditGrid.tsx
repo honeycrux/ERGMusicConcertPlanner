@@ -7,7 +7,7 @@ import { registerAllModules } from "handsontable/registry";
 registerAllModules();
 
 import { HotTable, HotTableRef } from "@handsontable/react-wrapper";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { PreferenceView, RundownEditForm } from "@/models/views.model";
 import { SystemMessage } from "./SystemMessage";
 import { RundownControlKey } from "@/models/rundown.model";
@@ -18,6 +18,7 @@ import { saveRundownDataController } from "@/actions/save-rundown-data.controlle
 import { z } from "zod";
 import { EDITOR_STATE } from "handsontable/editors/baseEditor";
 import { Duration, DateTime } from "luxon";
+import { ActionButton, exportCsv } from "../common/ActionButton";
 
 type RundownColumnGroupDefinition = {
   groupLabel: string;
@@ -57,6 +58,7 @@ const rundownColumnGroups: RundownColumnGroupDefinition[] = [
 
 const newRowPrefix = "new-";
 const idAtColumn = 0;
+const updateInterval = Duration.fromObject({ seconds: 15 });
 
 function arrayEquals<T>(a: T[], b: T[]): boolean {
   return a.length === b.length && a.every((value, index) => value === b[index]);
@@ -67,29 +69,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
   const [data, setData] = useState(rundown);
   const [prevOrdering, setPrevOrdering] = useState<string[]>(rundown.map((row) => row.id));
   const [systemMessage, setSystemMessage] = useState<ReactElement>(<div>No system message.</div>);
-  const updateInterval = Duration.fromObject({ seconds: 15 });
   const nextUpdate = useRef(DateTime.now().plus(updateInterval));
-
-  useEffect(() => {
-    const timerID = setInterval(() => {
-      const hot = hotRef.current?.hotInstance;
-      if (!hot) {
-        setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
-        return;
-      }
-      if (hot.getActiveEditor()?.state === EDITOR_STATE.EDITING) {
-        return;
-      }
-      if (DateTime.now() > nextUpdate.current) {
-        fetchUpdatesCallback();
-        nextUpdate.current = DateTime.now().plus(updateInterval);
-      }
-    }, 3000);
-
-    return () => {
-      clearInterval(timerID);
-    };
-  }, [updateInterval]);
 
   const exportCsvCallback = () => {
     const hot = hotRef.current?.hotInstance;
@@ -97,20 +77,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
       // TODO: Show error message
       return;
     }
-    const exportPlugin = hot.getPlugin("exportFile");
-
-    exportPlugin.downloadFile("csv", {
-      bom: false,
-      columnDelimiter: ",",
-      columnHeaders: true,
-      exportHiddenColumns: true,
-      exportHiddenRows: true,
-      fileExtension: "csv",
-      filename: "Handsontable-CSV-file_[YYYY]-[MM]-[DD]",
-      mimeType: "text/csv",
-      rowDelimiter: "\r\n",
-      rowHeaders: true,
-    });
+    exportCsv(hot, "Rundown");
   };
 
   const addRowCallback = () => {
@@ -122,7 +89,7 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
     hot.alter("insert_row_below", hot.countRows());
   };
 
-  const fetchUpdatesCallback = async () => {
+  const fetchUpdatesCallback = useCallback(async () => {
     const newResults = await getConcertRundownEditFormController();
     const hot = hotRef.current?.hotInstance;
     if (!hot) {
@@ -140,7 +107,8 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
       setSystemMessage(<SystemMessage message="Fetch failed." type="error" />);
     }
     console.log("Table updated.");
-  };
+    nextUpdate.current = DateTime.now().plus(updateInterval);
+  }, []);
 
   const afterChangeCallback = async (changes: CellChange[]) => {
     const results = [];
@@ -260,6 +228,26 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
     fetchUpdatesCallback();
   };
 
+  useEffect(() => {
+    const timerID = setInterval(() => {
+      const hot = hotRef.current?.hotInstance;
+      if (!hot) {
+        setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
+        return;
+      }
+      if (hot.getActiveEditor()?.state === EDITOR_STATE.EDITING) {
+        return;
+      }
+      if (DateTime.now() > nextUpdate.current) {
+        fetchUpdatesCallback();
+      }
+    }, 3000);
+
+    return () => {
+      clearInterval(timerID);
+    };
+  }, [fetchUpdatesCallback]);
+
   const nestedHeaders = [
     rundownColumnGroups.map((column) => ({
       label: column.groupLabel,
@@ -328,12 +316,8 @@ export function RundownEditGrid({ rundown, performances }: { rundown: RundownEdi
         />
       </div>
       <div className="flex justify-center">
-        <button onClick={() => exportCsvCallback()} className="bg-zinc-300 border hover:border-zinc-700 text-black py-1 px-5 rounded">
-          Download CSV
-        </button>
-        <button onClick={() => addRowCallback()} className="bg-zinc-300 border hover:border-zinc-700 text-black py-1 px-5 rounded">
-          Add Row
-        </button>
+        <ActionButton onClick={exportCsvCallback}>Download CSV</ActionButton>
+        <ActionButton onClick={addRowCallback}>Add Row</ActionButton>
       </div>
       <div className="flex justify-center p-2 text-gray-500">{systemMessage}</div>
     </>
