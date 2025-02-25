@@ -278,7 +278,7 @@ export function PerformanceEditGrid() {
           }}
         />
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center px-4 p-2">
         <ActionButton onClick={exportCsvCallback}>Download CSV</ActionButton>
         <ActionButton onClick={addRowCallback}>Add Row</ActionButton>
       </div>

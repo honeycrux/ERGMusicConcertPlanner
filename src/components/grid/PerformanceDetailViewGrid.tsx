@@ -82,7 +82,7 @@ export function PerformanceDetailViewGrid({ performances }: { performances: Perf
           licenseKey="non-commercial-and-evaluation"
         />
       </div>
-      <div className="px-4">
+      <div className="px-4 py-2">
         <ActionButton onClick={exportCsvCallback}>Download CSV</ActionButton>
       </div>
     </>

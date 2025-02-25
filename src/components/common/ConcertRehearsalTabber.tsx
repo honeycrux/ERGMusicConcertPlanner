@@ -7,7 +7,7 @@ export function ConcertRehearsalTabber({ concert, rehearsal }: { concert: React.
 
   return (
     <>
-      <div className="flex justify-center p-4">
+      <div className="flex justify-center px-4 p-2">
         <button
           onClick={() => setSelectedTab(0)}
           className={`mx-2 px-4 py-2 rounded border hover:border-zinc-700 ${selectedTab === 0 ? "bg-sky-600 text-white" : "bg-zinc-300"}`}
