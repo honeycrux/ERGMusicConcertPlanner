@@ -1,11 +1,24 @@
 # Installation
 
+This is a Next.js applicaation that runs on Node.js. This page is about how to setup, install and update the application.
+
 ## Guide
 
-### Download
-Run `git clone git@github.com:honeycrux/ERGMusicConcertPlanner.git`.
+### Setup
 
-### Database
+#### Dependencies
+Install Node.js:
+- Install [Node.js](https://nodejs.org/en) on your system.
+- Check if you have an installation of Node.js by running `node --version` and `npm --version` in the terminal.
+
+Install Git:
+- Install [Git](https://git-scm.com/downloads) on your system.
+- Check if you have an installation of Git by running `git --version`.
+
+#### Download
+Download our code by running `git clone git@github.com:honeycrux/ERGMusicConcertPlanner.git`.
+
+#### Database
 This project will not run locally without .env files containing databases login credentials.
 
 Use a MongoDB database. For example, [MongoDB Atlas](https://www.mongodb.com/atlas) can be used. They offer 1 free cluster per account.

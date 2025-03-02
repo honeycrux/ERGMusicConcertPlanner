@@ -180,26 +180,28 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
   const beforeRemoveRowCallback = async (index: number, amount: number) => {
     // rows := [index, index + 1, ..., index + amount - 1]
     const rows: number[] = new Array(amount).fill(index).map((value, index) => value + index);
-    for (const row of rows) {
-      const id = hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn);
-      if (typeof id !== "string") {
-        throw new TypeError(`Unexpected ID type ${typeof id}, expected string`);
-      }
-      if (id.startsWith(newRowPrefix)) {
-        continue;
-      }
-      setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
-      const result = await saveRundownDataController(rundownType, [
-        {
-          type: "delete",
-          id,
-        },
-      ]);
-      if (result.success) {
-        setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
-      } else {
-        setSystemMessage(<SystemMessage message={result.message} type="error" />);
-      }
+    const ids = rows.map((row) => hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn));
+    const validIds = ids
+      .map((id) => {
+        if (typeof id !== "string") {
+          console.log(`id: ${id}`);
+          throw new TypeError(`Unexpected id type ${typeof id}, expected string`);
+        }
+        return id;
+      })
+      .filter((id) => !id.startsWith(newRowPrefix));
+    setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
+    const result = await saveRundownDataController(
+      rundownType,
+      validIds.map((id) => ({
+        type: "delete",
+        id,
+      }))
+    );
+    if (result.success) {
+      setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
+    } else {
+      setSystemMessage(<SystemMessage message={result.message} type="error" />);
     }
     fetchUpdatesCallback();
   };
