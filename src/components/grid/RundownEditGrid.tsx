@@ -265,6 +265,8 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
 
   return (
     <>
+      <DuplicateWarning rundown={rundown} />
+      <MissingWarning rundown={rundown} performances={performances} />
       <div className="ht-theme-main pb-2">
         <HotTable
           ref={hotRef}
@@ -328,5 +330,46 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
       </div>
       <div className="flex justify-center p-2 text-gray-500">{systemMessage}</div>
     </>
+  );
+}
+
+function DuplicateWarning({ rundown }: { rundown: RundownEditForm[] }) {
+  const rundownPerformanceIds = rundown
+    .map((row) => row.performance?.id)
+    .filter((id) => id !== undefined)
+    .filter((id) => id !== "");
+
+  const duplicates = rundownPerformanceIds
+    .filter((id, index, self) => {
+      console.log(id, index, self.indexOf(id) !== index);
+      return self.indexOf(id) !== index;
+    })
+    .filter((id, index, self) => self.indexOf(id) === index);
+
+  return (
+    duplicates.length > 0 && (
+      <div className="px-4 py-2 text-sm text-yellow-600">
+        <span className="font-bold">Warning:</span> These performances appear more than once: {duplicates.join(", ")}
+      </div>
+    )
+  );
+}
+
+function MissingWarning({ rundown, performances }: { rundown: RundownEditForm[]; performances: PreferenceView[] }) {
+  const performanceIds = performances.map((performance) => performance.id);
+
+  const rundownPerformanceIds = rundown
+    .map((row) => row.performance?.id)
+    .filter((id) => id !== undefined)
+    .filter((id) => id !== "");
+
+  const missing = performanceIds.filter((id) => !rundownPerformanceIds.includes(id));
+
+  return (
+    missing.length > 0 && (
+      <div className="px-4 py-2 text-sm text-yellow-600">
+        <span className="font-bold">Warning:</span> These performances are missing: {missing.join(", ")}
+      </div>
+    )
   );
 }
