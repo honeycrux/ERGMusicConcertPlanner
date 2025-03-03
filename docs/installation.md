@@ -53,4 +53,3 @@ For good measure, reinstall using `npm install`, then run it.
 ## Note
 The installation was tested on: Windows 10, Node 20.18.3, NPM 10.8.2
 (As of 2025/02, using a higher version of node gives error when installing Prisma and tsx.)
-(Development is ok. Build still fails.)

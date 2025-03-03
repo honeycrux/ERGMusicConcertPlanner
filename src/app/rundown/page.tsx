@@ -7,7 +7,7 @@ import { RundownEditGrid } from "@/components/grid/RundownEditGrid";
 import { ConcertRehearsalTabber } from "@/components/common/ConcertRehearsalTabber";
 import { CollapsibleSection } from "@/components/common/CollapsibleSection";
 
-export async function PreferenceViewGridWrapper() {
+async function PreferenceViewGridWrapper() {
   "use server";
 
   const result = await getPreferenceViewController();
