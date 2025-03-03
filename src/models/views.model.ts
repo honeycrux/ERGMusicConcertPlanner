@@ -11,6 +11,7 @@ export const PreferenceViewSchema = z.object({
     name: z.string(),
   }),
   preference: z.object({
+    performDuration: z.string().nullable(),
     concertAvailability: z.string(),
     rehearsalAvailability: z.string(),
     preferenceRemarks: z.string(),
@@ -88,6 +89,7 @@ export const ApplicantDetailViewSchema = z.object({
         applicantRemarks: z.string(),
       }),
       preference: z.object({
+        performDuration: z.string().nullable(),
         concertAvailability: z.string(),
         rehearsalAvailability: z.string(),
         preferenceRemarks: z.string(),
@@ -107,6 +109,10 @@ export type PerformanceEditForm = z.infer<typeof PerformanceEditFormSchema>;
 export const RundownEditFormSchema = RundownDataSchema.omit({
   performance: true,
 }).extend({
+  timeSlot: z.object({
+    startTime: z.string(),
+    duration: z.string(),
+  }),
   performance: PreferenceViewSchema.nullable(),
 });
 

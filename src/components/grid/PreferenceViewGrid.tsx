@@ -25,6 +25,7 @@ const preferenceViewColumnGroups = [
   {
     groupLabel: "Preference",
     columns: [
+      { title: "Perform Duration", data: "preference.performDuration", type: "text", readOnly: true },
       { title: "Concert Availability", data: "preference.concertAvailability", type: "text", readOnly: true },
       { title: "Rehearsal Availability", data: "preference.rehearsalAvailability", type: "text", readOnly: true },
       { title: "Remarks", data: "preference.preferenceRemarks", type: "text", readOnly: true },

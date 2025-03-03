@@ -24,6 +24,7 @@ export async function getRundownEditFormController(
           name: "",
         },
         preference: {
+          performDuration: null,
           concertAvailability: "",
           rehearsalAvailability: "",
           preferenceRemarks: "",

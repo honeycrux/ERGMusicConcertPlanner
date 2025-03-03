@@ -28,13 +28,20 @@ type RundownColumnGroupDefinition = {
 
 const rundownColumnGroups: RundownColumnGroupDefinition[] = [
   {
+    groupLabel: "Computed",
+    columns: [
+      { title: "Start Time", data: "timeSlot.startTime", type: "text", readOnly: true },
+      // { title: "Duration", data: "timeSlot.duration", type: "text", readOnly: true },
+    ],
+  },
+  {
     groupLabel: "Time Slot",
     columns: [
       { title: "ID", data: "id", type: "text", readOnly: true, width: 200 },
       { title: "Order", data: "order", type: "numeric", readOnly: true },
       { title: "Name", data: "name", type: "text" },
       { title: "Start Time", data: "startTime", type: "text", validator: datetimeValidator },
-      { title: "Event Duration", data: "eventDuration", type: "text", validator: durationValidator },
+      { title: "Duration Override", data: "eventDuration", type: "text", validator: durationValidator },
       { title: "Buffer Duration", data: "bufferDuration", type: "text", validator: durationValidator },
       { title: "Remarks", data: "remarks", type: "text" },
     ],
@@ -50,15 +57,16 @@ const rundownColumnGroups: RundownColumnGroupDefinition[] = [
   {
     groupLabel: "Preference",
     columns: [
-      { title: "Concert Availability", data: "preference.concertAvailability", type: "text", readOnly: true },
-      { title: "Rehearsal Availability", data: "preference.rehearsalAvailability", type: "text", readOnly: true },
-      { title: "Remarks", data: "preference.preferenceRemarks", type: "text", readOnly: true },
+      { title: "Perform Duration", data: "performance.preference.performDuration", type: "text", readOnly: true },
+      { title: "Concert Availability", data: "performance.preference.concertAvailability", type: "text", readOnly: true },
+      { title: "Rehearsal Availability", data: "performance.preference.rehearsalAvailability", type: "text", readOnly: true },
+      { title: "Remarks", data: "performance.preference.preferenceRemarks", type: "text", readOnly: true },
     ],
   },
 ];
 
 const newRowPrefix = "new-";
-const idAtColumn = 0;
+const idAtColumn = 1;
 const updateInterval = Duration.fromObject({ seconds: 15 });
 
 function arrayEquals<T>(a: T[], b: T[]): boolean {
@@ -118,17 +126,25 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
     const idColumn = hotRef.current?.hotInstance?.getDataAtCol(idAtColumn);
     const { data: ordering, error: idColumnParseError } = z.string().array().safeParse(idColumn);
     if (idColumnParseError) {
-      throw new TypeError(`Unexpected ID column type ${typeof idColumn}, expected array of string`);
+      console.error("idColumn", idColumn);
+      const message = `Unexpected ID column type ${typeof idColumn}, expected array of string`;
+      setSystemMessage(<SystemMessage message={message} type="error" />);
+      return;
     }
     for (const change of changes) {
       const [row, column, oldValue, newValue] = change;
       const id = hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn);
       if (typeof column !== "string") {
-        throw new TypeError(`Unexpected column (key) type ${typeof column}, expected string`);
+        console.error("column", column);
+        const message = `Unexpected column (key) type ${typeof column}, expected string`;
+        setSystemMessage(<SystemMessage message={message} type="error" />);
+        return;
       }
       if (typeof id !== "string") {
-        console.error(id);
-        throw new TypeError(`Unexpected ID type ${typeof id}, expected string`);
+        console.error("id", id);
+        const message = `Unexpected ID type ${typeof id}, expected string`;
+        setSystemMessage(<SystemMessage message={message} type="error" />);
+        return;
       }
       setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
       if (id.startsWith(newRowPrefix)) {
@@ -181,15 +197,17 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
     // rows := [index, index + 1, ..., index + amount - 1]
     const rows: number[] = new Array(amount).fill(index).map((value, index) => value + index);
     const ids = rows.map((row) => hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn));
-    const validIds = ids
-      .map((id) => {
-        if (typeof id !== "string") {
-          console.log(`id: ${id}`);
-          throw new TypeError(`Unexpected id type ${typeof id}, expected string`);
-        }
-        return id;
-      })
-      .filter((id) => !id.startsWith(newRowPrefix));
+    const validIds: string[] = [];
+    for (const id of ids) {
+      if (typeof id !== "string") {
+        const message = `Unexpected id type ${typeof id}, expected string`;
+        setSystemMessage(<SystemMessage message={message} type="error" />);
+        return;
+      }
+      if (!id.startsWith(newRowPrefix)) {
+        validIds.push(id);
+      }
+    }
     setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
     const result = await saveRundownDataController(
       rundownType,
@@ -211,7 +229,10 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
     const idColumn = hotRef.current?.hotInstance?.getDataAtCol(idAtColumn);
     const { data: ordering, error: idColumnParseError } = z.string().array().safeParse(idColumn);
     if (idColumnParseError) {
-      throw new TypeError(`Unexpected ID column type ${typeof idColumn}, expected array of string`);
+      console.error("idColumn", idColumn);
+      const message = `Unexpected ID column type ${typeof idColumn}, expected array of string`;
+      setSystemMessage(<SystemMessage message={message} type="error" />);
+      return;
     }
     if (arrayEquals(ordering, prevOrdering.current)) {
       return;
@@ -341,7 +362,6 @@ function DuplicateWarning({ rundown }: { rundown: RundownEditForm[] }) {
 
   const duplicates = rundownPerformanceIds
     .filter((id, index, self) => {
-      console.log(id, index, self.indexOf(id) !== index);
       return self.indexOf(id) !== index;
     })
     .filter((id, index, self) => self.indexOf(id) === index);

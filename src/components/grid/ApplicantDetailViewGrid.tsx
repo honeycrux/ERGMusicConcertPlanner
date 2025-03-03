@@ -40,6 +40,7 @@ const applicantDetailViewColumnGroups = [
   {
     groupLabel: "Preference",
     columns: [
+      { title: "Perform Duration", data: "preference.performDuration", type: "text", editor: false },
       { title: "Concert Availability", data: "performance.preference.concertAvailability", type: "text", editor: false },
       { title: "Rehearsal Availability", data: "performance.preference.rehearsalAvailability", type: "text", editor: false },
       { title: "Remarks", data: "performance.preference.preferenceRemarks", type: "text", editor: false },

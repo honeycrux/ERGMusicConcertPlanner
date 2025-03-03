@@ -80,6 +80,7 @@ export async function getApplicantDetailViewController(rundownType: RundownType)
             applicantRemarks: "",
           },
           preference: {
+            performDuration: null,
             concertAvailability: "",
             rehearsalAvailability: "",
             preferenceRemarks: "",

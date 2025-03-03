@@ -1,6 +1,6 @@
-<mxfile host="Electron" modified="2025-03-03T08:09:36.552Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.6.4 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="SNRHKuPJPL92uoxLc1XM" version="24.6.4" type="device" pages="3">
+<mxfile host="Electron" modified="2025-03-03T17:52:31.191Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.6.4 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="-Lsyyz4vq1Az1TSBz6c_" version="24.6.4" type="device" pages="3">
   <diagram name="entity-relation" id="jTwsFQjHSNGOv7V3bHkQ">
-    <mxGraphModel dx="2113" dy="1249" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2076" dy="1064" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -19,8 +19,8 @@
         <mxCell id="bzevvzoSuc9ApRX-USMG-14" value="Preference" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="363" y="228" width="160" height="200" as="geometry" />
         </mxCell>
-        <mxCell id="bzevvzoSuc9ApRX-USMG-15" value="&lt;div&gt;*id&lt;/div&gt;&lt;div&gt;concertAvailability&lt;/div&gt;&lt;div&gt;rehearsalAvailability&lt;/div&gt;&lt;div&gt;remarks&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;updatedAt&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" parent="bzevvzoSuc9ApRX-USMG-14" vertex="1">
-          <mxGeometry x="10" y="31" width="125" height="98" as="geometry" />
+        <mxCell id="bzevvzoSuc9ApRX-USMG-15" value="&lt;div&gt;*id&lt;/div&gt;&lt;div&gt;performDuration&lt;/div&gt;&lt;div&gt;concertAvailability&lt;/div&gt;&lt;div&gt;rehearsalAvailability&lt;/div&gt;&lt;div&gt;remarks&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;updatedAt&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" parent="bzevvzoSuc9ApRX-USMG-14" vertex="1">
+          <mxGeometry x="10" y="31" width="125" height="113" as="geometry" />
         </mxCell>
         <mxCell id="bzevvzoSuc9ApRX-USMG-16" value="StageRequirement" style="swimlane;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="363" y="444" width="160" height="200" as="geometry" />

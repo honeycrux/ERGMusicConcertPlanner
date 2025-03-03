@@ -406,10 +406,10 @@ export async function getNormalizedRundownOrdering(rundownType: RundownType): Pr
   if (!valid) {
     const updateResult = await updateRundown(
       rundownType,
-      result.map((slot) => {
+      result.map((slot, index) => {
         return {
           id: slot.id,
-          order: slot.order,
+          order: index + 1,
         };
       })
     );

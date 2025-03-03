@@ -5,6 +5,7 @@ import { LoadingText } from "@/components/common/LoadingText";
 import { PerformanceDetailViewGrid } from "../components/grid/PerformanceDetailViewGrid";
 import { StageRequirementViewGrid } from "../components/grid/StageRequirementViewGrid";
 import { RundownType } from "@/models/rundown.model";
+import { ConcertRehearsalTabber } from "@/components/common/ConcertRehearsalTabber";
 
 type WrapperProps = {
   rundownType: RundownType;
@@ -50,32 +51,62 @@ export default function Home() {
   return (
     <>
       <h1 className="flex text-xl font-bold p-4 pb-2">Performance Detail View</h1>
-      <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
-      <Suspense fallback={<LoadingText />}>
-        <PerformanceDetailViewGridWrapper rundownType="concert" />
-      </Suspense>
-      <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
-      <Suspense fallback={<LoadingText />}>
-        <PerformanceDetailViewGridWrapper rundownType="rehearsal" />
-      </Suspense>
+      <ConcertRehearsalTabber
+        concert={
+          <>
+            <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
+            <Suspense fallback={<LoadingText />}>
+              <PerformanceDetailViewGridWrapper rundownType="concert" />
+            </Suspense>
+          </>
+        }
+        rehearsal={
+          <>
+            <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
+            <Suspense fallback={<LoadingText />}>
+              <PerformanceDetailViewGridWrapper rundownType="rehearsal" />
+            </Suspense>
+          </>
+        }
+      />
       <h1 className="flex text-xl font-bold p-4 pb-2">Stage Requirement View</h1>
-      <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
-      <Suspense fallback={<LoadingText />}>
-        <StageRequirementViewGridWrapper rundownType="concert" />
-      </Suspense>
-      <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
-      <Suspense fallback={<LoadingText />}>
-        <StageRequirementViewGridWrapper rundownType="rehearsal" />
-      </Suspense>
+      <ConcertRehearsalTabber
+        concert={
+          <>
+            <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
+            <Suspense fallback={<LoadingText />}>
+              <StageRequirementViewGridWrapper rundownType="concert" />
+            </Suspense>
+          </>
+        }
+        rehearsal={
+          <>
+            <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
+            <Suspense fallback={<LoadingText />}>
+              <StageRequirementViewGridWrapper rundownType="rehearsal" />
+            </Suspense>
+          </>
+        }
+      />
       <h1 className="flex text-xl font-bold p-4 pb-2">Applicant Detail & Preference View</h1>
-      <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
-      <Suspense fallback={<LoadingText />}>
-        <ApplicantDetailViewGridWrapper rundownType="concert" />
-      </Suspense>
-      <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
-      <Suspense fallback={<LoadingText />}>
-        <ApplicantDetailViewGridWrapper rundownType="rehearsal" />
-      </Suspense>
+      <ConcertRehearsalTabber
+        concert={
+          <>
+            <h2 className="flex text-l font-bold p-4 pb-2">Concert</h2>
+            <Suspense fallback={<LoadingText />}>
+              <ApplicantDetailViewGridWrapper rundownType="concert" />
+            </Suspense>
+          </>
+        }
+        rehearsal={
+          <>
+            <h2 className="flex text-l font-bold p-4 pb-2">Rehearsal</h2>
+            <Suspense fallback={<LoadingText />}>
+              <ApplicantDetailViewGridWrapper rundownType="rehearsal" />
+            </Suspense>
+          </>
+        }
+      />
     </>
   );
 }

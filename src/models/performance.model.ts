@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { DataColumn } from "./DataColumn";
+import { Duration } from "luxon";
 
 export const PerformanceDataSchema = z.object({
   id: z.string(),
@@ -22,6 +23,7 @@ export const PerformanceDataSchema = z.object({
   }),
 
   preference: z.object({
+    performDuration: z.string().nullable(),
     concertAvailability: z.string(),
     rehearsalAvailability: z.string(),
     preferenceRemarks: z.string(),
@@ -65,6 +67,7 @@ export type PerformanceControlKey =
   | "applicant.email"
   | "applicant.phone"
   | "applicant.applicantRemarks"
+  | "preference.performDuration"
   | "preference.concertAvailability"
   | "preference.rehearsalAvailability"
   | "preference.preferenceRemarks"
@@ -183,6 +186,20 @@ export const performanceDataColumns: Record<PerformanceControlKey, DataColumn<Pe
       const value = EditPerformanceSchema.shape.applicant.unwrap().shape.applicantRemarks.parse(sanitizedValue);
       data.applicant ??= {};
       data.applicant.applicantRemarks = value;
+    },
+  }),
+  "preference.performDuration": new DataColumn<PerformanceData, EditPerformance>({
+    defaultValue: null,
+    getDbModelValue(data) {
+      return data.preference.performDuration;
+    },
+    setEditModelValue(data, sanitizedValue) {
+      const value = EditPerformanceSchema.shape.preference.unwrap().shape.performDuration.parse(sanitizedValue);
+      if (value && !Duration.fromISO(value).isValid) {
+        throw new Error(`Invalid ISO duration ${value}`);
+      }
+      data.preference ??= {};
+      data.preference.performDuration = value;
     },
   }),
   "preference.concertAvailability": new DataColumn<PerformanceData, EditPerformance>({

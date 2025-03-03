@@ -47,10 +47,11 @@ model Applicant {
 }
 
 model Preference {
-  id                    String @id @default(auto()) @map("_id") @db.ObjectId
-  concertAvailability   String @default("")
-  rehearsalAvailability String @default("")
-  preferenceRemarks     String @default("")
+  id                    String  @id @default(auto()) @map("_id") @db.ObjectId
+  performDuration       String? // ISO 8601 duration string
+  concertAvailability   String  @default("")
+  rehearsalAvailability String  @default("")
+  preferenceRemarks     String  @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

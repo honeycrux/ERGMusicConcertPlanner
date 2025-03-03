@@ -14,55 +14,57 @@ import { PerformanceControlKey } from "@/models/performance.model";
 import { CellChange } from "handsontable/common";
 import { getPerformanceEditFormController } from "@/actions/get-performance-edit-form.controller";
 import { SystemMessage } from "./SystemMessage";
-import { exportCsv, isUserInputSource } from "./grid-utils";
+import { durationValidator, exportCsv, isUserInputSource } from "./grid-utils";
 import { DateTime, Duration } from "luxon";
 import { EDITOR_STATE } from "handsontable/editors/baseEditor";
 import { ActionButton } from "../common/ActionButton";
+import { BaseValidator } from "handsontable/validators";
 
 export type PerformanceColumnGroupDefinition = {
   groupLabel: string;
-  columns: { label: string; key: PerformanceControlKey; type: "text" | "numeric"; readOnly?: boolean; width?: number }[];
+  columns: { title: string; data: PerformanceControlKey; type: "text" | "numeric"; readOnly?: boolean; width?: number; validator?: BaseValidator }[];
 };
 
 export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
   {
     groupLabel: "Performance",
     columns: [
-      { label: "ID", key: "id", type: "text", readOnly: true, width: 200 },
-      { label: "Genre", key: "genre", type: "text" },
-      { label: "Piece", key: "piece", type: "text" },
-      { label: "Performance Description", key: "description", type: "text" },
-      { label: "Performer List", key: "performerList", type: "text" },
-      { label: "Performer Description", key: "performerDescription", type: "text" },
-      { label: "General Remarks", key: "remarks", type: "text" },
+      { title: "ID", data: "id", type: "text", readOnly: true, width: 200 },
+      { title: "Genre", data: "genre", type: "text" },
+      { title: "Piece", data: "piece", type: "text" },
+      { title: "Performance Description", data: "description", type: "text" },
+      { title: "Performer List", data: "performerList", type: "text" },
+      { title: "Performer Description", data: "performerDescription", type: "text" },
+      { title: "General Remarks", data: "remarks", type: "text" },
     ],
   },
   {
     groupLabel: "Applicant",
     columns: [
-      { label: "Applicant Name", key: "applicant.name", type: "text" },
-      { label: "Applicant Email", key: "applicant.email", type: "text" },
-      { label: "Applicant Phone", key: "applicant.phone", type: "text" },
-      { label: "Applicant Remarks", key: "applicant.applicantRemarks", type: "text" },
+      { title: "Applicant Name", data: "applicant.name", type: "text" },
+      { title: "Applicant Email", data: "applicant.email", type: "text" },
+      { title: "Applicant Phone", data: "applicant.phone", type: "text" },
+      { title: "Applicant Remarks", data: "applicant.applicantRemarks", type: "text" },
     ],
   },
   {
     groupLabel: "Preference",
     columns: [
-      { label: "Concert Availability", key: "preference.concertAvailability", type: "text" },
-      { label: "Rehearsal Availability", key: "preference.rehearsalAvailability", type: "text" },
-      { label: "Preference Remarks", key: "preference.preferenceRemarks", type: "text" },
+      { title: "Perform Duration", data: "preference.performDuration", type: "text", validator: durationValidator },
+      { title: "Concert Availability", data: "preference.concertAvailability", type: "text" },
+      { title: "Rehearsal Availability", data: "preference.rehearsalAvailability", type: "text" },
+      { title: "Preference Remarks", data: "preference.preferenceRemarks", type: "text" },
     ],
   },
   {
     groupLabel: "Stage Requirements",
     columns: [
-      { label: "Chair Count", key: "stageRequirement.chairCount", type: "numeric" },
-      { label: "Music Stand Count", key: "stageRequirement.musicStandCount", type: "numeric" },
-      { label: "Microphone Count", key: "stageRequirement.microphoneCount", type: "numeric" },
-      { label: "Provided Equipment", key: "stageRequirement.providedEquipment", type: "text" },
-      { label: "Self Equipment", key: "stageRequirement.selfEquipment", type: "text" },
-      { label: "Stage Remarks", key: "stageRequirement.stageRemarks", type: "text" },
+      { title: "Chair Count", data: "stageRequirement.chairCount", type: "numeric" },
+      { title: "Music Stand Count", data: "stageRequirement.musicStandCount", type: "numeric" },
+      { title: "Microphone Count", data: "stageRequirement.microphoneCount", type: "numeric" },
+      { title: "Provided Equipment", data: "stageRequirement.providedEquipment", type: "text" },
+      { title: "Self Equipment", data: "stageRequirement.selfEquipment", type: "text" },
+      { title: "Stage Remarks", data: "stageRequirement.stageRemarks", type: "text" },
     ],
   },
 ];
@@ -121,11 +123,16 @@ export function PerformanceEditGrid() {
       const [row, column, oldValue, newValue] = change;
       const id = hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn);
       if (typeof column !== "string") {
-        throw new TypeError(`Unexpected column (key) type ${typeof column}, expected string`);
+        console.error("column", column);
+        const message = `Unexpected column (key) type ${typeof column}, expected string`;
+        setSystemMessage(<SystemMessage message={message} type="error" />);
+        return;
       }
       if (typeof id !== "string") {
-        console.error(id);
-        throw new TypeError(`Unexpected id type "${typeof id}", expected string`);
+        console.error("id", id);
+        const message = `Unexpected id type ${typeof id}, expected string`;
+        setSystemMessage(<SystemMessage message={message} type="error" />);
+        return;
       }
       setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
       if (id.startsWith(newRowPrefix)) {
@@ -175,15 +182,18 @@ export function PerformanceEditGrid() {
     // rows := [index, index + 1, ..., index + amount - 1]
     const rows: number[] = new Array(amount).fill(index).map((value, index) => value + index);
     const ids = rows.map((row) => hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn));
-    const validIds = ids
-      .map((id) => {
-        if (typeof id !== "string") {
-          console.log(`id: ${id}`);
-          throw new TypeError(`Unexpected id type ${typeof id}, expected string`);
-        }
-        return id;
-      })
-      .filter((id) => !id.startsWith(newRowPrefix));
+    const validIds = [];
+    for (const id of ids) {
+      if (typeof id !== "string") {
+        console.error(`id: ${id}`);
+        const message = `Unexpected id type ${typeof id}, expected string`;
+        setSystemMessage(<SystemMessage message={message} type="error" />);
+        return;
+      }
+      if (!id.startsWith(newRowPrefix)) {
+        validIds.push(id);
+      }
+    }
     setSystemMessage(<SystemMessage message="Saving changes..." type="info" />);
     const result = await savePerformanceDataController(
       validIds.map((id) => ({
@@ -226,7 +236,7 @@ export function PerformanceEditGrid() {
       label: column.groupLabel,
       colspan: column.columns.length,
     })),
-    performanceColumnGroups.flatMap((column) => column.columns.map((column) => column.label)),
+    performanceColumnGroups.flatMap((column) => column.columns.map((column) => column.title)),
   ];
 
   return (
@@ -239,10 +249,11 @@ export function PerformanceEditGrid() {
           columns={performanceColumnGroups.flatMap((column) => {
             return column.columns.map((column) => {
               const baseConfig = {
-                data: column.key,
+                data: column.data,
                 type: column.type,
                 readOnly: column.readOnly,
                 width: column.width,
+                validator: column.validator,
               };
               return baseConfig;
             });

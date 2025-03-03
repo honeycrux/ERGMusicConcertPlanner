@@ -36,6 +36,8 @@ export type EditRundownWithId = EditRundown & { id: string };
 export type RundownType = "concert" | "rehearsal";
 
 export type RundownControlKey =
+  | "timeSlot.startTime"
+  | "timeSlot.duration"
   | "id"
   | "order"
   | "name"
@@ -46,11 +48,22 @@ export type RundownControlKey =
   | "performance.id"
   | "performance.genre"
   | "performance.applicant.name"
-  | "preference.concertAvailability"
-  | "preference.rehearsalAvailability"
-  | "preference.preferenceRemarks";
+  | "performance.preference.performDuration"
+  | "performance.preference.concertAvailability"
+  | "performance.preference.rehearsalAvailability"
+  | "performance.preference.preferenceRemarks";
 
 export const rundownDataColumns: Record<RundownControlKey, DataColumn<RundownData, EditRundown>> = {
+  "timeSlot.startTime": new DataColumn<RundownData, EditRundown>({
+    defaultValue: "",
+    getDbModelValue() {},
+    setEditModelValue() {},
+  }),
+  "timeSlot.duration": new DataColumn<RundownData, EditRundown>({
+    defaultValue: "",
+    getDbModelValue() {},
+    setEditModelValue() {},
+  }),
   id: new DataColumn<RundownData, EditRundown>({
     defaultValue: "",
     getDbModelValue() {},
@@ -140,17 +153,22 @@ export const rundownDataColumns: Record<RundownControlKey, DataColumn<RundownDat
     getDbModelValue() {},
     setEditModelValue() {},
   }),
-  "preference.concertAvailability": new DataColumn<RundownData, EditRundown>({
+  "performance.preference.performDuration": new DataColumn<RundownData, EditRundown>({
+    defaultValue: null,
+    getDbModelValue() {},
+    setEditModelValue() {},
+  }),
+  "performance.preference.concertAvailability": new DataColumn<RundownData, EditRundown>({
     defaultValue: "",
     getDbModelValue() {},
     setEditModelValue() {},
   }),
-  "preference.rehearsalAvailability": new DataColumn<RundownData, EditRundown>({
+  "performance.preference.rehearsalAvailability": new DataColumn<RundownData, EditRundown>({
     defaultValue: "",
     getDbModelValue() {},
     setEditModelValue() {},
   }),
-  "preference.preferenceRemarks": new DataColumn<RundownData, EditRundown>({
+  "performance.preference.preferenceRemarks": new DataColumn<RundownData, EditRundown>({
     defaultValue: "",
     getDbModelValue() {},
     setEditModelValue() {},
