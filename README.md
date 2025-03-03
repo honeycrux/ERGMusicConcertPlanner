@@ -6,6 +6,9 @@ This project is still maintained by its author, which means fixes and additions 
 
 **In its current state, without an authentication layer and page access control, this application allows all modification of data unrestricted. Therefore, it should not be hosted on the Internet, and should only be used locally with shared credentials among trusted members.**
 
+[For Installation](docs/installation.md)  
+[For Development](docs/development.md)  
+
 ## Vision and Expectation
 This application is written for current and potentially future rundown organizers of ERGMusic.
 

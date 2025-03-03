@@ -13,8 +13,7 @@ Requirements:
 Features:
 
 1. Home Page
-    - Show overall view
-    - Show stage view, rundown view, and MC view, which are data summaries for each kind of activity
+    - Show data summaries for each kind of activity, including: stage overview for stage, performance overview for MCs, applicant overview for liaison
     - Download the views either in picture format or in a format readable by Excel/Google Sheets
 2. "Edit Performance" Page
     - Add performance item
@@ -24,15 +23,16 @@ Features:
     - Add concert and rehearsal rundown that represent performance items and breaks
     - Edit concert and rehearsal rundown order
     - Delete concert and rehearsal rundown
-    - Show summary of rundown, including expected starting and ending time of each item
+    - (Optional) Show summary of rundown, including expected starting and ending time of each item
 
 ## Overview
 
 This section outlines a high-level overview of the architectural choices made for this application. Any changes should be reflected here.
 
 - A full-stack Next.js application is used. A web interface is presented to the user.
-- (Where should backend logic exist? Server actions, or routes?)
+- Next.js server actions are used in place of backend API routes.
 - Prisma ORM is used for database access. MongoDB is used as the database model, as MongoDB Atlas is a cloud-based solution that is relatively easy to set up.
 - TailwindCSS is used.
-- Component libraries installed are: AG Grid.
+- Component libraries installed are: Handsontable.
+- Other libraries installed are: Luxon (for working with dates and time), Zod (for declaring and validating data types)
 - For now, there is no UI component suite installed, giving future developers flexibility to choose their own if they decide to improve the user interface with one.
