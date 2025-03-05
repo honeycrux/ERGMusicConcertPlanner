@@ -23,11 +23,15 @@ export type DataColumnConfig<DatabaseMode, EditModel> = {
   equals?: (a: unknown, b: unknown) => boolean;
 };
 
+export function isEmptyValue(value: unknown): boolean {
+  return value === undefined || value === null || value === "";
+}
+
 export class DataColumn<DatabaseModel, EditModel> {
   public constructor(private readonly config: DataColumnConfig<DatabaseModel, EditModel>) {}
 
   private isEmptyValue(value: unknown): boolean {
-    return value === undefined || value === null || value === "";
+    return isEmptyValue(value);
   }
 
   private equals(a: unknown, b: unknown): boolean {

@@ -16,13 +16,22 @@ import { getPerformanceEditFormController } from "@/actions/get-performance-edit
 import { SystemMessage } from "./SystemMessage";
 import { durationValidator, exportCsv, isUserInputSource } from "./grid-utils";
 import { DateTime, Duration } from "luxon";
-import { EDITOR_STATE } from "handsontable/editors/baseEditor";
 import { ActionButton } from "../common/ActionButton";
-import { BaseValidator } from "handsontable/validators";
+import { BaseValidator, ValidatorType } from "handsontable/validators";
+import { isEmptyValue } from "@/models/DataColumn";
+
+// import { EDITOR_STATE } from "handsontable/editors/baseEditor";
 
 export type PerformanceColumnGroupDefinition = {
   groupLabel: string;
-  columns: { title: string; data: PerformanceControlKey; type: "text" | "numeric"; readOnly?: boolean; width?: number; validator?: BaseValidator }[];
+  columns: {
+    title: string;
+    data: PerformanceControlKey;
+    type: "text" | "numeric";
+    readOnly?: boolean;
+    width?: number;
+    validator?: BaseValidator | RegExp | ValidatorType | string;
+  }[];
 };
 
 export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
@@ -59,9 +68,9 @@ export const performanceColumnGroups: PerformanceColumnGroupDefinition[] = [
   {
     groupLabel: "Stage Requirements",
     columns: [
-      { title: "Chair Count", data: "stageRequirement.chairCount", type: "numeric" },
-      { title: "Music Stand Count", data: "stageRequirement.musicStandCount", type: "numeric" },
-      { title: "Microphone Count", data: "stageRequirement.microphoneCount", type: "numeric" },
+      { title: "Chair Count", data: "stageRequirement.chairCount", type: "numeric", validator: "numeric" },
+      { title: "Music Stand Count", data: "stageRequirement.musicStandCount", type: "numeric", validator: "numeric" },
+      { title: "Microphone Count", data: "stageRequirement.microphoneCount", type: "numeric", validator: "numeric" },
       { title: "Provided Equipment", data: "stageRequirement.providedEquipment", type: "text" },
       { title: "Self Equipment", data: "stageRequirement.selfEquipment", type: "text" },
       { title: "Stage Remarks", data: "stageRequirement.stageRemarks", type: "text" },
@@ -121,6 +130,9 @@ export function PerformanceEditGrid() {
     const results = [];
     for (const change of changes) {
       const [row, column, oldValue, newValue] = change;
+      if ((isEmptyValue(oldValue) && isEmptyValue(newValue)) || oldValue === newValue) {
+        continue;
+      }
       const id = hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn);
       if (typeof column !== "string") {
         console.error("column", column);
@@ -158,6 +170,9 @@ export function PerformanceEditGrid() {
         ]);
         results.push(result);
       }
+    }
+    if (results.length === 0) {
+      return;
     }
     if (results.every((result) => result.success)) {
       setSystemMessage(<SystemMessage message="Changes saved." type="success" />);
@@ -212,23 +227,25 @@ export function PerformanceEditGrid() {
   useEffect(() => {
     fetchUpdatesCallback();
 
-    const timerID = setInterval(() => {
-      const hot = hotRef.current?.hotInstance;
-      if (!hot) {
-        setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
-        return;
-      }
-      if (hot.getActiveEditor()?.state === EDITOR_STATE.EDITING) {
-        return;
-      }
-      if (DateTime.now() > nextUpdate.current) {
-        fetchUpdatesCallback();
-      }
-    }, 3000);
+    /* Auto refresh */
 
-    return () => {
-      clearInterval(timerID);
-    };
+    // const timerID = setInterval(() => {
+    //   const hot = hotRef.current?.hotInstance;
+    //   if (!hot) {
+    //     setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
+    //     return;
+    //   }
+    //   if (hot.getActiveEditor()?.state === EDITOR_STATE.EDITING) {
+    //     return;
+    //   }
+    //   if (DateTime.now() > nextUpdate.current) {
+    //     fetchUpdatesCallback();
+    //   }
+    // }, 3000);
+
+    // return () => {
+    //   clearInterval(timerID);
+    // };
   }, [fetchUpdatesCallback]);
 
   const nestedHeaders = [

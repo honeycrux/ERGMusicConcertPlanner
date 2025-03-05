@@ -16,14 +16,23 @@ import { getRundownEditFormController } from "@/actions/get-rundown-edit-form.co
 import { CellChange } from "handsontable/common";
 import { saveRundownDataController } from "@/actions/save-rundown-data.controller";
 import { z } from "zod";
-import { EDITOR_STATE } from "handsontable/editors/baseEditor";
 import { Duration, DateTime } from "luxon";
 import { ActionButton } from "../common/ActionButton";
-import { BaseValidator } from "handsontable/validators";
+import { BaseValidator, ValidatorType } from "handsontable/validators";
+import { isEmptyValue } from "@/models/DataColumn";
+
+// import { EDITOR_STATE } from "handsontable/editors/baseEditor";
 
 type RundownColumnGroupDefinition = {
   groupLabel: string;
-  columns: { title: string; data: RundownControlKey; type: string; readOnly?: boolean; width?: number; validator?: BaseValidator }[];
+  columns: {
+    title: string;
+    data: RundownControlKey;
+    type: string;
+    readOnly?: boolean;
+    width?: number;
+    validator?: BaseValidator | RegExp | ValidatorType | string;
+  }[];
 };
 
 const rundownColumnGroups: RundownColumnGroupDefinition[] = [
@@ -133,6 +142,9 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
     }
     for (const change of changes) {
       const [row, column, oldValue, newValue] = change;
+      if ((isEmptyValue(oldValue) && isEmptyValue(newValue)) || oldValue === newValue) {
+        continue;
+      }
       const id = hotRef.current?.hotInstance?.getDataAtCell(row, idAtColumn);
       if (typeof column !== "string") {
         console.error("column", column);
@@ -172,6 +184,9 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
         ]);
         results.push(result);
       }
+    }
+    if (results.length === 0) {
+      return;
     }
     if (results.every((result) => result.success)) {
       prevOrdering.current = ordering;
@@ -257,23 +272,25 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
   useEffect(() => {
     fetchUpdatesCallback();
 
-    const timerID = setInterval(() => {
-      const hot = hotRef.current?.hotInstance;
-      if (!hot) {
-        setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
-        return;
-      }
-      if (hot.getActiveEditor()?.state === EDITOR_STATE.EDITING) {
-        return;
-      }
-      if (DateTime.now() > nextUpdate.current) {
-        fetchUpdatesCallback();
-      }
-    }, 3000);
+    /* Auto refresh */
 
-    return () => {
-      clearInterval(timerID);
-    };
+    // const timerID = setInterval(() => {
+    //   const hot = hotRef.current?.hotInstance;
+    //   if (!hot) {
+    //     setSystemMessage(<SystemMessage message="Failed to fetch updates: Hot instance not found." type="error" />);
+    //     return;
+    //   }
+    //   if (hot.getActiveEditor()?.state === EDITOR_STATE.EDITING) {
+    //     return;
+    //   }
+    //   if (DateTime.now() > nextUpdate.current) {
+    //     fetchUpdatesCallback();
+    //   }
+    // }, 3000);
+
+    // return () => {
+    //   clearInterval(timerID);
+    // };
   }, [fetchUpdatesCallback]);
 
   const nestedHeaders = [
