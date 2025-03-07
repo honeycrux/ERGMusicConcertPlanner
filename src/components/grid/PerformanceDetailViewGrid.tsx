@@ -11,6 +11,7 @@ import { PerformanceDetailView } from "@/models/views.model";
 import { ActionButton } from "../common/ActionButton";
 import React from "react";
 import { exportCsv } from "./grid-utils";
+import { RundownType } from "@/models/rundown.model";
 
 const performanceDetailViewColumnGroups = [
   {
@@ -33,15 +34,15 @@ const performanceDetailViewColumnGroups = [
     groupLabel: "Performance Detail",
     columns: [
       { title: "Piece", data: "performance.piece", type: "text", editor: false },
-      { title: "Performance Description", data: "performance.performanceDescription", type: "text", editor: false },
+      { title: "Performance Description", data: "performance.description", type: "text", editor: false },
       { title: "Performer List", data: "performance.performerList", type: "text", editor: false },
       { title: "Performer Description", data: "performance.performerDescription", type: "text", editor: false },
-      { title: "Remarks", data: "performance.generalRemarks", type: "text", editor: false },
+      { title: "Remarks", data: "performance.remarks", type: "text", editor: false },
     ],
   },
 ];
 
-export function PerformanceDetailViewGrid({ performances }: { performances: PerformanceDetailView[] }) {
+export function PerformanceDetailViewGrid({ performances, rundownType }: { performances: PerformanceDetailView[]; rundownType: RundownType }) {
   const hotRef = React.useRef<HotTableRef>(null);
 
   const exportCsvCallback = () => {
@@ -50,7 +51,7 @@ export function PerformanceDetailViewGrid({ performances }: { performances: Perf
       // TODO: Show error message
       return;
     }
-    exportCsv(hot, "Performance-Detail");
+    exportCsv(hot, `Performance-Detail_${rundownType}`);
   };
 
   const nestedHeaders = [

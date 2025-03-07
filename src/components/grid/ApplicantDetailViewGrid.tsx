@@ -11,6 +11,7 @@ import { ApplicantDetailView } from "@/models/views.model";
 import React from "react";
 import { ActionButton } from "../common/ActionButton";
 import { exportCsv } from "./grid-utils";
+import { RundownType } from "@/models/rundown.model";
 
 const applicantDetailViewColumnGroups = [
   {
@@ -40,7 +41,7 @@ const applicantDetailViewColumnGroups = [
   {
     groupLabel: "Preference",
     columns: [
-      { title: "Perform Duration", data: "preference.performDuration", type: "text", editor: false },
+      { title: "Perform Duration", data: "performance.preference.performDuration", type: "text", editor: false },
       { title: "Concert Availability", data: "performance.preference.concertAvailability", type: "text", editor: false },
       { title: "Rehearsal Availability", data: "performance.preference.rehearsalAvailability", type: "text", editor: false },
       { title: "Remarks", data: "performance.preference.preferenceRemarks", type: "text", editor: false },
@@ -48,7 +49,7 @@ const applicantDetailViewColumnGroups = [
   },
 ];
 
-export function ApplicantDetailViewGrid({ performances }: { performances: ApplicantDetailView[] }) {
+export function ApplicantDetailViewGrid({ performances, rundownType }: { performances: ApplicantDetailView[]; rundownType: RundownType }) {
   const hotRef = React.useRef<HotTableRef>(null);
 
   const exportCsvCallback = () => {
@@ -57,7 +58,7 @@ export function ApplicantDetailViewGrid({ performances }: { performances: Applic
       // TODO: Show error message
       return;
     }
-    exportCsv(hot, "Applicant-Detail");
+    exportCsv(hot, `Applicant-Detail_${rundownType}`);
   };
 
   const nestedHeaders = [

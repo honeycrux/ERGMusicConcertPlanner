@@ -20,7 +20,7 @@ async function PerformanceDetailViewGridWrapper({ rundownType }: WrapperProps) {
     return <div>Error loading data: {result.message}</div>;
   }
 
-  return <PerformanceDetailViewGrid performances={result.data} />;
+  return <PerformanceDetailViewGrid performances={result.data} rundownType={rundownType} />;
 }
 
 async function StageRequirementViewGridWrapper({ rundownType }: WrapperProps) {
@@ -32,7 +32,7 @@ async function StageRequirementViewGridWrapper({ rundownType }: WrapperProps) {
     return <div>Error loading data: {result.message}</div>;
   }
 
-  return <StageRequirementViewGrid performances={result.data} />;
+  return <StageRequirementViewGrid performances={result.data} rundownType={rundownType} />;
 }
 
 async function ApplicantDetailViewGridWrapper({ rundownType }: WrapperProps) {
@@ -44,7 +44,7 @@ async function ApplicantDetailViewGridWrapper({ rundownType }: WrapperProps) {
     return <div>Error loading data: {result.message}</div>;
   }
 
-  return <ApplicantDetailViewGrid performances={result.data} />;
+  return <ApplicantDetailViewGrid performances={result.data} rundownType={rundownType} />;
 }
 
 export default function Home() {

@@ -11,6 +11,7 @@ import { StageRequirementView } from "@/models/views.model";
 import React from "react";
 import { ActionButton } from "../common/ActionButton";
 import { exportCsv } from "./grid-utils";
+import { RundownType } from "@/models/rundown.model";
 
 const stageRequirementViewColumnGroups = [
   {
@@ -37,13 +38,13 @@ const stageRequirementViewColumnGroups = [
       { title: "#Mics", data: "performance.stageRequirement.microphoneCount", type: "numeric", editor: false },
       { title: "Provided", data: "performance.stageRequirement.providedEquipment", type: "text", editor: false },
       { title: "Self", data: "performance.stageRequirement.selfEquipment", type: "text", editor: false },
-      { title: "Remarks", data: "performance.stageRequirement.remarks", type: "text", editor: false },
+      { title: "Remarks", data: "performance.stageRequirement.stageRemarks", type: "text", editor: false },
       { title: "Stage Actions", data: "timeSlot.stageActions", type: "text", editor: false },
     ],
   },
 ];
 
-export function StageRequirementViewGrid({ performances }: { performances: StageRequirementView[] }) {
+export function StageRequirementViewGrid({ performances, rundownType }: { performances: StageRequirementView[]; rundownType: RundownType }) {
   const hotRef = React.useRef<HotTableRef>(null);
 
   const exportCsvCallback = () => {
@@ -52,7 +53,7 @@ export function StageRequirementViewGrid({ performances }: { performances: Stage
       // TODO: Show error message
       return;
     }
-    exportCsv(hot, "Stage-Requirement");
+    exportCsv(hot, `Stage-Requirement_${rundownType}`);
   };
 
   const nestedHeaders = [

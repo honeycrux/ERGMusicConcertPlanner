@@ -96,7 +96,7 @@ export function RundownEditGrid({ rundownType }: { rundownType: RundownType }) {
       // TODO: Show error message
       return;
     }
-    exportCsv(hot, "Rundown");
+    exportCsv(hot, `Rundown_${rundownType}`);
   };
 
   const addRowCallback = () => {
